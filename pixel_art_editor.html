@@ -1,0 +1,3244 @@
+﻿<!doctype html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="google" content="notranslate">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Pixel Art">
+  <title>Pixel Art Editor</title>
+  <link id="favicon" rel="icon" type="image/png" href="assets/ios/pixel_art_editor_ios_icon_1024.png">
+  <link id="appleTouchIcon" rel="apple-touch-icon" sizes="1024x1024" href="assets/ios/pixel_art_editor_ios_icon_1024.png">
+  <link href="https://unpkg.com/font-misaki/misaki_gothic.css" rel="stylesheet">
+  <link href="https://unpkg.com/font-misaki/misaki_mincho.css" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172026;
+      --muted: #6b7280;
+      --panel: #ffffff;
+      --line: #d9dee7;
+      --soft: #f4f7fb;
+      --canvas: #eef2f7;
+      --accent: #0f766e;
+      --accent-dark: #0b5f59;
+      --danger: #b91c1c;
+      --radius: 8px;
+      --shadow: 0 18px 48px rgba(25, 35, 48, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(245, 158, 11, 0.10)),
+        #f7f9fc;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, color 120ms ease;
+    }
+
+    button:hover {
+      border-color: #9aa7b8;
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, 0.24);
+      outline-offset: 2px;
+    }
+
+    .app {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(14px, 3vw, 28px);
+      border-bottom: 1px solid rgba(23, 32, 38, 0.10);
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      object-fit: cover;
+      border: 1px solid #c8d1dd;
+      border-radius: var(--radius);
+      background: #10d5dc;
+      box-shadow: 0 6px 18px rgba(23, 32, 38, 0.10);
+      image-rendering: pixelated;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(250px, 300px);
+      gap: 16px;
+      padding: clamp(14px, 3vw, 24px);
+      min-height: 0;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(23, 32, 38, 0.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #43505f;
+    }
+
+    .left,
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .workspace {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    .canvas-shell {
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 2vw, 24px);
+      background:
+        linear-gradient(90deg, rgba(23, 32, 38, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(23, 32, 38, 0.035) 1px, transparent 1px),
+        var(--canvas);
+      background-size: 18px 18px;
+      border: 1px solid rgba(23, 32, 38, 0.12);
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72), var(--shadow);
+      overflow: auto;
+    }
+
+    #canvas {
+      width: min(72vmin, 720px, 100%);
+      height: auto;
+      max-width: 100%;
+      max-height: calc(100vh - 220px);
+      aspect-ratio: 1;
+      background: #fff;
+      border: 1px solid #aab6c5;
+      box-shadow: 0 18px 44px rgba(23, 32, 38, 0.16);
+      cursor: crosshair;
+      image-rendering: pixelated;
+      touch-action: none;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tool-btn,
+    .icon-btn {
+      min-height: 42px;
+      border-radius: var(--radius);
+      display: inline-grid;
+      place-items: center;
+      font-weight: 700;
+    }
+
+    .tool-btn[aria-pressed="true"],
+    .icon-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+
+    .tool-btn svg,
+    .selection-action-btn svg {
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      stroke-width: 2.15;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: #415063;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .height-field::before {
+      content: "\9AD8\3055";
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"],
+    textarea {
+      min-width: 0;
+      border: 1px solid #cfd7e3;
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 10px;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      height: 38px;
+    }
+
+    textarea {
+      min-height: 58px;
+      padding: 8px 10px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 44px;
+      padding: 2px;
+      border: 1px solid #cfd7e3;
+      border-radius: var(--radius);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: 0;
+      border-radius: 6px;
+    }
+
+    input[type="color"]::-moz-color-swatch {
+      border: 0;
+      border-radius: 6px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid #cfd7e3;
+      border-radius: var(--radius);
+      background: #eef2f7;
+    }
+
+    .segment-btn {
+      min-height: 32px;
+      border-radius: 6px;
+      border-color: transparent;
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .segment-btn[aria-pressed="true"] {
+      background: #ffffff;
+      border-color: #b8c3d2;
+      color: var(--accent-dark);
+      box-shadow: 0 1px 5px rgba(23, 32, 38, 0.10);
+    }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 112px;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 7px;
+    }
+
+    .swatch {
+      width: 100%;
+      aspect-ratio: 1;
+      min-height: 26px;
+      border-radius: var(--radius);
+      border: 2px solid rgba(23, 32, 38, 0.16);
+    }
+
+    .swatch.active {
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .action-btn {
+      min-height: 40px;
+      border-radius: var(--radius);
+      font-weight: 750;
+    }
+
+    .action-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+    }
+
+    .selection-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .selection-action-btn {
+      min-height: 48px;
+      padding: 0;
+    }
+
+    .selection-note {
+      margin: 0;
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .layer-actions {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .layer-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .layer-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .layer-name-button,
+    .layer-name-input {
+      min-height: 40px;
+      height: 40px;
+      padding: 0 12px;
+      overflow: hidden;
+      text-align: left;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .layer-name-button {
+      justify-content: start;
+    }
+
+    .layer-row.active .layer-name-button,
+    .layer-row.active .layer-name-input {
+      background: rgba(15, 118, 110, 0.12);
+      border-color: var(--accent);
+      color: #0b5f59;
+    }
+
+    .layer-icon-btn {
+      min-height: 40px;
+      padding: 0;
+    }
+
+    .layer-icon-btn svg {
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+      stroke-width: 2.1;
+    }
+
+    .layer-delete-btn {
+      color: #1b1f24;
+      border-color: #cfd7e3;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+
+    .danger {
+      color: var(--danger);
+      border-color: rgba(185, 28, 28, 0.34);
+    }
+
+    .status {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #465568;
+      font-size: 0.85rem;
+    }
+
+    .status strong {
+      color: var(--ink);
+      font-size: 0.92rem;
+    }
+
+    .preview-frame {
+      display: grid;
+      place-items: center;
+      min-height: 196px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background-color: #e7edf5;
+      background-image:
+        linear-gradient(45deg, #cfd8e5 25%, transparent 25%),
+        linear-gradient(-45deg, #cfd8e5 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #cfd8e5 75%),
+        linear-gradient(-45deg, transparent 75%, #cfd8e5 75%);
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+      overflow: hidden;
+    }
+
+    #preview {
+      width: 160px;
+      height: 160px;
+      border: 0;
+      box-shadow: none;
+      max-height: none;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-note {
+      margin: 0;
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(23, 32, 38, 0.38);
+    }
+
+    .confirm-overlay[hidden] {
+      display: none;
+    }
+
+    .confirm-dialog {
+      width: min(420px, 100%);
+      padding: 18px;
+      border: 1px solid rgba(23, 32, 38, 0.16);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 22px 60px rgba(23, 32, 38, 0.24);
+    }
+
+    .confirm-dialog h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ink);
+    }
+
+    .confirm-list {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 0;
+      list-style: none;
+      color: #405064;
+      font-size: 0.9rem;
+    }
+
+    .confirm-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #edf1f6;
+    }
+
+    .confirm-list strong {
+      color: var(--ink);
+      font-weight: 750;
+      text-align: right;
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 1040px) {
+      .main {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .right {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      html {
+        scroll-padding-top: 72px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        align-items: center;
+        flex-direction: row;
+        padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: none;
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      h1 {
+        font-size: 1rem;
+      }
+
+      .file-actions {
+        position: fixed;
+        right: 12px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        left: 12px;
+        z-index: 15;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid rgba(23, 32, 38, 0.12);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 16px 46px rgba(23, 32, 38, 0.22);
+        backdrop-filter: blur(14px);
+      }
+
+      .file-actions button {
+        min-height: 48px;
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 10px calc(96px + env(safe-area-inset-bottom));
+      }
+
+      .workspace {
+        order: 1;
+        gap: 8px;
+      }
+
+      .left {
+        order: 2;
+      }
+
+      .right {
+        order: 3;
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 12px;
+        box-shadow: 0 8px 24px rgba(25, 35, 48, 0.10);
+      }
+
+      .left,
+      .right {
+        gap: 10px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(52px, 1fr);
+        grid-template-columns: none;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .tool-btn,
+      .icon-btn,
+      .action-btn,
+      .layer-icon-btn,
+      .segment-btn {
+        min-height: 46px;
+      }
+
+      .tool-btn {
+        scroll-snap-align: start;
+      }
+
+      .canvas-shell {
+        min-height: min(58vh, 430px);
+        padding: 10px;
+      }
+
+      #canvas {
+        width: min(94vw, 640px, 100%);
+        height: auto;
+        max-height: 58vh;
+      }
+
+      .status {
+        min-height: 36px;
+        padding: 9px 10px;
+        font-size: 0.78rem;
+      }
+
+      .control-grid,
+      .color-row {
+        grid-template-columns: 1fr;
+      }
+
+      select,
+      input[type="number"],
+      input[type="text"] {
+        height: 44px;
+      }
+
+      input[type="color"] {
+        height: 50px;
+      }
+
+      textarea {
+        min-height: 70px;
+      }
+
+      .palette {
+        grid-template-columns: repeat(8, minmax(34px, 1fr));
+        gap: 8px;
+      }
+
+      .swatch {
+        min-height: 36px;
+      }
+
+      .preview-frame {
+        min-height: 148px;
+      }
+
+      #preview {
+        width: 128px;
+        height: 128px;
+      }
+
+      .confirm-overlay {
+        align-items: end;
+        padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+      }
+
+      .confirm-dialog {
+        width: 100%;
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .topbar {
+        gap: 10px;
+      }
+
+      .brand {
+        gap: 8px;
+      }
+
+      .main {
+        padding-inline: 8px;
+      }
+
+      .canvas-shell {
+        min-height: min(54vh, 390px);
+      }
+
+      #canvas {
+        width: min(96vw, 100%);
+        max-height: 54vh;
+      }
+
+      .toolbar {
+        grid-auto-columns: 52px;
+      }
+
+      .layer-actions {
+        gap: 6px;
+      }
+
+      .selection-actions {
+        gap: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-icon" id="appIcon" src="assets/ios/pixel_art_editor_ios_icon_1024.png" alt="" aria-hidden="true">
+        <h1 id="appTitle" class="notranslate" translate="no">Pixel Art Editor</h1>
+      </div>
+      <div class="file-actions" aria-label="ファイル操作">
+        <button class="action-btn" id="importImage" type="button">インポート</button>
+        <button class="action-btn primary" id="exportPng" type="button">PNG保存</button>
+        <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      </div>
+    </header>
+
+    <main class="main">
+      <aside class="left" aria-label="編集メニュー">
+        <section class="panel stack">
+          <h2>描画ツール</h2>
+          <div class="toolbar" role="toolbar" aria-label="描画ツール">
+            <button class="tool-btn" type="button" data-tool="draw" aria-label="ペン" title="ペン">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.7 4.4a2.5 2.5 0 0 1 3.5 3.5L9.4 18.7 4.5 20l1.3-4.9L16.7 4.4z"></path>
+                <path d="M14.8 6.3l2.9 2.9"></path>
+                <path d="M5.8 15.1l3.6 3.6"></path>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="erase" aria-label="消しゴム" title="消しゴム">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5.2 14.3l7.7-7.7a3 3 0 0 1 4.2 0l1.7 1.7a3 3 0 0 1 0 4.2l-5.8 5.8H8.7l-3.5-3.5a.4.4 0 0 1 0-.5z"></path>
+                <path d="M11.2 8.3l4.5 4.5"></path>
+                <path d="M8.2 20h9.6"></path>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="fill" aria-label="塗りつぶし" title="塗りつぶし">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5.2 12.1l6.2-6.2a2.3 2.3 0 0 1 3.2 0l4.2 4.2a2.3 2.3 0 0 1 0 3.2L13.1 19a2.3 2.3 0 0 1-3.2 0l-4.7-4.7a1.5 1.5 0 0 1 0-2.2z"></path>
+                <path d="M8.6 8.7l6.7 6.7"></path>
+                <path d="M19.2 16.7c1 1 1.6 1.8 1.6 2.5a1.8 1.8 0 0 1-3.6 0c0-.7.7-1.5 2-2.5z"></path>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="pick" aria-label="色を拾う" title="色を拾う">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.9 4.7a2.4 2.4 0 0 1 3.4 0l1 1a2.4 2.4 0 0 1 0 3.4l-8.4 8.4H7.4v-3.5l7.5-9.3z"></path>
+                <path d="M13.2 7.2l3.6 3.6"></path>
+                <path d="M7.4 17.5l-3 2"></path>
+                <path d="M4.4 20.5h5.3"></path>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="lasso" aria-label="なげわ選択" title="なげわ選択">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6.2 8.4c1.1-3.2 6.9-4.4 10.7-2.4 3.5 1.9 3.7 5.9.5 7.6-3.7 2-10.4.8-11.5-2.2-.3-.9-.2-2 .3-3z"></path>
+                <path d="M5.4 11.1c-1.8 1.5-1.5 3.6.8 5 3.4 2.1 10.4 2 13.2-.1"></path>
+                <path d="M10.8 17.1l-2.2 3.5"></path>
+                <path d="M8.2 20.6h4.5"></path>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="circle" aria-label="丸" title="丸">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="7.2"></circle>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="rect" aria-label="四角" title="四角">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5.5" y="5.5" width="13" height="13" rx="1.2"></rect>
+              </svg>
+            </button>
+            <button class="tool-btn" type="button" data-tool="text" aria-label="テキスト" title="テキスト">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 6h14"></path>
+                <path d="M12 6v12"></path>
+                <path d="M9 18h6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="control-grid">
+            <label>
+              ペンの太さ
+              <input type="number" id="brushSize" min="1" max="32" step="1" value="1">
+            </label>
+            <label>
+              図形
+              <div class="segmented" aria-label="図形の描画方法">
+                <button class="segment-btn" type="button" data-shape-style="fill" aria-pressed="true">塗り</button>
+                <button class="segment-btn" type="button" data-shape-style="stroke" aria-pressed="false">線</button>
+              </div>
+            </label>
+          </div>
+          <label>
+            テキスト
+            <textarea id="textInput" rows="2" spellcheck="false">TEXT</textarea>
+          </label>
+          <div class="control-grid">
+            <label>
+              フォント
+              <select id="textFont">
+                <option value="misaki_gothic" selected>美咲ゴシック</option>
+                <option value="misaki_mincho">美咲明朝</option>
+              </select>
+            </label>
+            <label>
+              向き
+              <div class="segmented" aria-label="テキストの向き">
+                <button class="segment-btn" type="button" data-text-direction="horizontal" aria-pressed="true">横書き</button>
+                <button class="segment-btn" type="button" data-text-direction="vertical" aria-pressed="false">縦書き</button>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <h2>選択編集</h2>
+          <div class="selection-actions">
+            <button class="action-btn selection-action-btn" id="copySelection" type="button" aria-label="コピー" title="コピー" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="8" width="10" height="10" rx="2.4"></rect>
+                <rect x="5" y="5" width="10" height="10" rx="2.4"></rect>
+              </svg>
+            </button>
+            <button class="action-btn selection-action-btn" id="flipSelection" type="button" aria-label="左右反転" title="左右反転" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4.5v15"></path>
+                <path d="M8.2 7.4L4.5 11l3.7 3.6"></path>
+                <path d="M15.8 7.4l3.7 3.6-3.7 3.6"></path>
+                <path d="M4.8 11h5.1"></path>
+                <path d="M14.1 11h5.1"></path>
+              </svg>
+            </button>
+            <button class="action-btn selection-action-btn" id="rotateSelection" type="button" aria-label="90度回転" title="90度回転" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.8 7.2A7.2 7.2 0 1 0 19 15"></path>
+                <path d="M17.8 7.2h-4.2"></path>
+                <path d="M17.8 7.2v-4.2"></path>
+                <path d="M9 10.2v4.8h4.8"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="selection-note" id="selectionStatus">選択範囲なし</p>
+        </section>
+
+        <section class="panel stack">
+          <h2>色を選ぶ</h2>
+          <div class="color-row">
+            <label>
+              現在の色
+              <input type="color" id="colorPicker" value="#172026">
+            </label>
+            <label>
+              色コード
+              <input type="text" id="hexInput" value="#172026" maxlength="7" spellcheck="false">
+            </label>
+          </div>
+          <div class="palette" id="palette" aria-label="カラーパレット"></div>
+        </section>
+
+      </aside>
+
+      <section class="workspace" aria-label="ピクセルキャンバス">
+        <div class="panel status">
+          <span><strong id="sizeLabel">32 x 32</strong> キャンバス</span>
+          <span id="coordLabel">x -, y -</span>
+        </div>
+        <div class="canvas-shell">
+          <canvas id="canvas" width="720" height="720" aria-label="編集用ピクセルキャンバス"></canvas>
+        </div>
+        <div class="panel status">
+          <span id="toolLabel">ペン</span>
+          <span id="filledLabel">0 マス着色</span>
+        </div>
+      </section>
+
+      <aside class="right" aria-label="プレビューとPNG保存">
+        <section class="panel stack">
+          <h2>プレビュー</h2>
+          <div class="preview-frame">
+            <canvas id="preview" width="160" height="160" aria-label="縮小プレビュー"></canvas>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <h2>レイヤー</h2>
+          <div class="layer-actions" aria-label="レイヤー操作">
+            <button class="action-btn layer-icon-btn" id="addLayer" type="button" aria-label="レイヤーを追加" title="レイヤーを追加">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+              </svg>
+            </button>
+            <button class="action-btn layer-icon-btn" id="duplicateLayer" type="button" aria-label="レイヤーを複製" title="レイヤーを複製">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="8" width="10" height="10" rx="2.4"></rect>
+                <rect x="5" y="5" width="10" height="10" rx="2.4"></rect>
+              </svg>
+            </button>
+            <button class="action-btn layer-icon-btn" id="moveLayerUp" type="button" aria-label="レイヤーを上へ" title="レイヤーを上へ">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19V5"></path>
+                <path d="M6.5 10.5L12 5l5.5 5.5"></path>
+              </svg>
+            </button>
+            <button class="action-btn layer-icon-btn" id="moveLayerDown" type="button" aria-label="レイヤーを下へ" title="レイヤーを下へ">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14"></path>
+                <path d="M6.5 13.5L12 19l5.5-5.5"></path>
+              </svg>
+            </button>
+            <button class="action-btn layer-icon-btn layer-delete-btn" id="deleteLayer" type="button" aria-label="レイヤーを削除" title="レイヤーを削除">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8.2 7.2h7.6"></path>
+                <path d="M10 7.2V5.7c0-.7.5-1.2 1.2-1.2h1.6c.7 0 1.2.5 1.2 1.2v1.5"></path>
+                <path d="M6.8 9.2h10.4"></path>
+                <path d="M8.3 9.2l.6 9.2c.1.8.7 1.4 1.5 1.4h3.2c.8 0 1.4-.6 1.5-1.4l.6-9.2"></path>
+                <path d="M10.8 12v4.6"></path>
+                <path d="M13.2 12v4.6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="layer-list" id="layerList" aria-label="レイヤー一覧"></div>
+        </section>
+
+        <section class="panel stack">
+          <h2>PNG保存</h2>
+          <label>
+            ファイル名
+            <input type="text" id="fileName" value="pixel-art.png" spellcheck="false">
+          </label>
+        </section>
+
+        <section class="panel stack">
+          <h2>キャンバス設定</h2>
+          <label>
+            キャンバスサイズ
+            <select id="sizePreset">
+              <option value="32" selected>32 x 32</option>
+              <option value="64">64 x 64</option>
+              <option value="128">128 x 128</option>
+              <option value="custom">任意サイズ</option>
+            </select>
+          </label>
+          <div class="control-grid">
+            <label>
+              幅
+              <input type="number" id="gridWidth" min="8" max="128" step="1" value="32">
+            </label>
+            <label class="height-field">
+              <input type="number" id="gridHeight" min="8" max="128" step="1" value="32" aria-label="高さ">
+            </label>
+          </div>
+          <div class="actions">
+            <button class="action-btn" id="resizeCanvas" type="button">サイズ変更</button>
+            <button class="action-btn danger" id="clearCanvas" type="button">白紙にする</button>
+          </div>
+          <p class="mini-note" id="message" aria-live="polite"></p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="confirm-overlay" id="exportConfirm" role="dialog" aria-modal="true" aria-labelledby="exportConfirmTitle" hidden>
+    <div class="confirm-dialog">
+      <h2 id="exportConfirmTitle">PNG保存の確認</h2>
+      <ul class="confirm-list">
+        <li><span>キャンバス</span><strong id="confirmCanvasSize">32 x 32</strong></li>
+        <li><span>保存される画像</span><strong id="confirmOutputSize">32 x 32px</strong></li>
+        <li><span>ファイル名</span><strong id="confirmFileName">pixel-art.png</strong></li>
+      </ul>
+      <div class="confirm-actions">
+        <button class="action-btn" id="cancelExport" type="button">キャンセル</button>
+        <button class="action-btn primary" id="confirmExport" type="button">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const defaultPalette = [
+      "#172026", "#ffffff", "#d9dee7", "#6b7280",
+      "#ef4444", "#f97316", "#f59e0b", "#facc15",
+      "#22c55e", "#0f766e", "#06b6d4", "#2563eb",
+      "#7c3aed", "#db2777", "#78350f", "#f5d0a9",
+      "#3f2a56", "#6d4c41", "#b45309", "#84cc16",
+      "#14b8a6", "#38bdf8", "#a78bfa", "#fb7185"
+    ];
+
+    const canvas = document.querySelector("#canvas");
+    const ctx = canvas.getContext("2d");
+    const appIcon = document.querySelector("#appIcon");
+    const appTitle = document.querySelector("#appTitle");
+    const favicon = document.querySelector("#favicon");
+    const appleTouchIcon = document.querySelector("#appleTouchIcon");
+    const preview = document.querySelector("#preview");
+    const previewCtx = preview.getContext("2d");
+    const paletteEl = document.querySelector("#palette");
+    const colorPicker = document.querySelector("#colorPicker");
+    const hexInput = document.querySelector("#hexInput");
+    const brushSizeInput = document.querySelector("#brushSize");
+    const textInput = document.querySelector("#textInput");
+    const textFont = document.querySelector("#textFont");
+    const sizePreset = document.querySelector("#sizePreset");
+    const gridWidth = document.querySelector("#gridWidth");
+    const gridHeight = document.querySelector("#gridHeight");
+    const sizeLabel = document.querySelector("#sizeLabel");
+    const coordLabel = document.querySelector("#coordLabel");
+    const filledLabel = document.querySelector("#filledLabel");
+    const toolLabel = document.querySelector("#toolLabel");
+    const message = document.querySelector("#message");
+    const copySelection = document.querySelector("#copySelection");
+    const flipSelection = document.querySelector("#flipSelection");
+    const rotateSelection = document.querySelector("#rotateSelection");
+    const selectionStatus = document.querySelector("#selectionStatus");
+    const importImage = document.querySelector("#importImage");
+    const imageInput = document.querySelector("#imageInput");
+    const exportPng = document.querySelector("#exportPng");
+    const fileName = document.querySelector("#fileName");
+    const layerList = document.querySelector("#layerList");
+    const addLayer = document.querySelector("#addLayer");
+    const duplicateLayer = document.querySelector("#duplicateLayer");
+    const moveLayerUp = document.querySelector("#moveLayerUp");
+    const moveLayerDown = document.querySelector("#moveLayerDown");
+    const deleteLayer = document.querySelector("#deleteLayer");
+    const exportConfirm = document.querySelector("#exportConfirm");
+    const exportConfirmTitle = document.querySelector("#exportConfirmTitle");
+    const confirmCanvasSize = document.querySelector("#confirmCanvasSize");
+    const confirmOutputSize = document.querySelector("#confirmOutputSize");
+    const confirmFileName = document.querySelector("#confirmFileName");
+    const cancelExport = document.querySelector("#cancelExport");
+    const confirmExport = document.querySelector("#confirmExport");
+
+    let width = 32;
+    let height = 32;
+    let layers = [];
+    let activeLayerIndex = 0;
+    let editingLayerIndex = null;
+    let layerIdCounter = 1;
+    let pixels = makeGrid(width, height);
+    let activeTool = "draw";
+    let activeColor = "#172026";
+    let brushSize = 1;
+    let shapeStyle = "fill";
+    let textDirection = "horizontal";
+    let drawing = false;
+    let activePointerId = null;
+    let lastPaintCell = null;
+    let strokeStartCell = null;
+    let strokeBasePixels = null;
+    let shapeStartCell = null;
+    let shapeCurrentCell = null;
+    let shapeShiftKey = false;
+    let selectionMask = null;
+    let selectionBounds = null;
+    let lassoPoints = [];
+    let movingSelection = false;
+    let moveStartCell = null;
+    let moveBasePixels = null;
+    let moveCells = [];
+    let moveBounds = null;
+    let moveDelta = { x: 0, y: 0 };
+    let moveHasChanged = false;
+    let duplicateSelectionOnMove = false;
+    let moveKeepsOriginal = false;
+    let resizingSelection = false;
+    let resizeBasePixels = null;
+    let resizeSourceCells = [];
+    let resizeSourceBounds = null;
+    let resizeSourceMask = null;
+    let resizeHandle = null;
+    let resizePointerOffset = { x: 0, y: 0 };
+    let resizeHasChanged = false;
+    let resizeLastSignature = "";
+    let history = [];
+    let noticeTimer = 0;
+    let canvasMetrics = {
+      size: 720,
+      cell: 30,
+      offsetX: 0,
+      offsetY: 0
+    };
+
+    favicon.href = appIcon.src;
+    appleTouchIcon.href = appIcon.src;
+
+    function lockAppTitle() {
+      document.title = "Pixel Art Editor";
+      appTitle.textContent = "Pixel Art Editor";
+    }
+
+    function makeGrid(cols, rows) {
+      return Array.from({ length: rows }, () => Array(cols).fill(null));
+    }
+
+    function cloneGrid(grid) {
+      return grid.map((row) => row.slice());
+    }
+
+    function createLayer(name, grid = makeGrid(width, height), visible = true) {
+      return {
+        id: layerIdCounter++,
+        name,
+        visible,
+        pixels: grid
+      };
+    }
+
+    function cloneLayers(sourceLayers) {
+      return sourceLayers.map((layer) => ({
+        id: layer.id,
+        name: layer.name,
+        visible: layer.visible,
+        pixels: cloneGrid(layer.pixels)
+      }));
+    }
+
+    function activeLayer() {
+      return layers[activeLayerIndex];
+    }
+
+    function syncActivePixels() {
+      pixels = activeLayer().pixels;
+    }
+
+    function setActivePixels(nextPixels) {
+      activeLayer().pixels = nextPixels;
+      pixels = nextPixels;
+    }
+
+    function setLayers(nextLayers, nextActiveIndex = 0) {
+      layers = nextLayers;
+      activeLayerIndex = Math.max(0, Math.min(layers.length - 1, nextActiveIndex));
+      editingLayerIndex = null;
+      syncActivePixels();
+      layerIdCounter = Math.max(layerIdCounter, ...layers.map((layer) => layer.id + 1));
+    }
+
+    setLayers([createLayer("レイヤー 1", pixels)]);
+
+    function normalizeHex(value) {
+      const trimmed = value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) {
+        return trimmed.toLowerCase();
+      }
+      return null;
+    }
+
+    function escapeAttribute(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function setNotice(text) {
+      message.textContent = text;
+      window.clearTimeout(noticeTimer);
+      noticeTimer = window.setTimeout(() => {
+        message.textContent = "";
+      }, 2200);
+    }
+
+    function setActiveColor(color) {
+      activeColor = color.toLowerCase();
+      colorPicker.value = activeColor;
+      hexInput.value = activeColor;
+      updateSwatches();
+    }
+
+    function setTool(tool) {
+      activeTool = tool;
+      document.querySelectorAll("[data-tool]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.tool === tool));
+      });
+      const labels = {
+        draw: "ペン",
+        erase: "消しゴム",
+        fill: "塗りつぶし",
+        pick: "色を拾う",
+        lasso: "なげわ選択"
+      };
+      toolLabel.textContent = labels[tool] || ({ circle: "丸", rect: "四角", text: "テキスト" })[tool] || "";
+      updateCanvasCursor(null);
+    }
+
+    function clearSelection() {
+      selectionMask = null;
+      selectionBounds = null;
+      lassoPoints = [];
+      duplicateSelectionOnMove = false;
+      moveKeepsOriginal = false;
+      updateSelectionControls();
+    }
+
+    function updateSelectionControls() {
+      const selectedCount = selectionMask ? selectionMask.flat().filter(Boolean).length : 0;
+      const hasSelection = selectedCount > 0;
+      copySelection.disabled = !hasSelection;
+      flipSelection.disabled = !hasSelection;
+      rotateSelection.disabled = !hasSelection;
+      selectionStatus.textContent = hasSelection ? `${selectedCount} マス選択中` : "選択範囲なし";
+    }
+
+    function updateLayerControls() {
+      moveLayerUp.disabled = activeLayerIndex >= layers.length - 1;
+      moveLayerDown.disabled = activeLayerIndex <= 0;
+      deleteLayer.disabled = layers.length <= 1;
+    }
+
+    function visibilityIcon(isVisible) {
+      return isVisible
+        ? '<path d="M3.5 12s3.2-5 8.5-5 8.5 5 8.5 5-3.2 5-8.5 5-8.5-5-8.5-5z"></path><circle cx="12" cy="12" r="2.4"></circle>'
+        : '<path d="M4.5 4.5l15 15"></path><path d="M9.8 7.4A9.7 9.7 0 0 1 12 7c5.3 0 8.5 5 8.5 5a13 13 0 0 1-2.4 2.8"></path><path d="M14.1 14.1A2.4 2.4 0 0 1 9.9 9.9"></path><path d="M6.4 6.9A14 14 0 0 0 3.5 12s3.2 5 8.5 5c1.2 0 2.2-.2 3.2-.6"></path>';
+    }
+
+    function renderLayerList() {
+      layerList.innerHTML = layers
+        .map((layer, layerIndex) => {
+          const isActive = layerIndex === activeLayerIndex;
+          const layerName = escapeAttribute(layer.name);
+          const nameControl = editingLayerIndex === layerIndex
+            ? `<input class="layer-name-input" type="text" value="${layerName}" aria-label="レイヤー名" title="${layerName}" maxlength="24" spellcheck="false">`
+            : `<button class="action-btn layer-name-button" type="button" aria-label="${layerName}を選択" title="ダブルクリックで名前変更">${layerName}</button>`;
+          return `
+            <div class="layer-row${isActive ? " active" : ""}" data-layer-index="${layerIndex}">
+              <button class="action-btn layer-icon-btn layer-visibility" type="button" aria-label="${layerName}の表示切替" title="表示切替">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${visibilityIcon(layer.visible)}</svg>
+              </button>
+              ${nameControl}
+            </div>
+          `;
+        })
+        .reverse()
+        .join("");
+      updateLayerControls();
+      const editingInput = layerList.querySelector(".layer-name-input");
+      if (editingInput) {
+        editingInput.focus();
+        editingInput.select();
+      }
+    }
+
+    function compositeColorAt(x, y) {
+      for (let i = layers.length - 1; i >= 0; i -= 1) {
+        const layer = layers[i];
+        if (!layer.visible) {
+          continue;
+        }
+        const color = layer.pixels[y][x];
+        if (color) {
+          return color;
+        }
+      }
+      return null;
+    }
+
+    function drawPixelsGrid(context, grid, cell, offsetX, offsetY) {
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const color = grid[y][x];
+          if (color) {
+            context.fillStyle = color;
+            context.fillRect(offsetX + x * cell, offsetY + y * cell, Math.ceil(cell), Math.ceil(cell));
+          }
+        }
+      }
+    }
+
+    function drawVisibleLayers(context, cell, offsetX, offsetY) {
+      layers.forEach((layer) => {
+        if (layer.visible) {
+          drawPixelsGrid(context, layer.pixels, cell, offsetX, offsetY);
+        }
+      });
+    }
+
+    function selectedCells() {
+      if (!selectionMask) {
+        return [];
+      }
+      const cells = [];
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (selectionMask[y][x]) {
+            cells.push({ x, y, color: pixels[y][x] });
+          }
+        }
+      }
+      return cells;
+    }
+
+    function isSelectedCell(cell) {
+      return Boolean(cell && selectionMask && selectionMask[cell.y] && selectionMask[cell.y][cell.x]);
+    }
+
+    function isInsideSelectionBounds(cell) {
+      return Boolean(
+        cell
+        && selectionBounds
+        && cell.x >= selectionBounds.minX
+        && cell.x <= selectionBounds.maxX
+        && cell.y >= selectionBounds.minY
+        && cell.y <= selectionBounds.maxY
+      );
+    }
+
+    function selectionHandleFromEvent(event) {
+      if (!selectionBounds || activeTool !== "lasso") {
+        return null;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const scale = canvasMetrics.size / rect.width;
+      const pointerX = (event.clientX - rect.left) * scale;
+      const pointerY = (event.clientY - rect.top) * scale;
+      const handleSize = Math.max(8, Math.min(14, canvasMetrics.cell * 0.7));
+      const corners = [
+        { handle: "nw", x: canvasMetrics.offsetX + selectionBounds.minX * canvasMetrics.cell, y: canvasMetrics.offsetY + selectionBounds.minY * canvasMetrics.cell },
+        { handle: "ne", x: canvasMetrics.offsetX + (selectionBounds.maxX + 1) * canvasMetrics.cell, y: canvasMetrics.offsetY + selectionBounds.minY * canvasMetrics.cell },
+        { handle: "sw", x: canvasMetrics.offsetX + selectionBounds.minX * canvasMetrics.cell, y: canvasMetrics.offsetY + (selectionBounds.maxY + 1) * canvasMetrics.cell },
+        { handle: "se", x: canvasMetrics.offsetX + (selectionBounds.maxX + 1) * canvasMetrics.cell, y: canvasMetrics.offsetY + (selectionBounds.maxY + 1) * canvasMetrics.cell }
+      ];
+
+      const corner = corners.find((corner) => (
+        Math.abs(pointerX - corner.x) <= handleSize
+        && Math.abs(pointerY - corner.y) <= handleSize
+      ));
+      return corner ? corner.handle : null;
+    }
+
+    function cursorForResizeHandle(handle) {
+      return handle === "nw" || handle === "se" ? "nwse-resize" : "nesw-resize";
+    }
+
+    function boundsForCells(cells) {
+      if (!cells.length) {
+        return null;
+      }
+      return cells.reduce((bounds, cell) => ({
+        minX: Math.min(bounds.minX, cell.x),
+        minY: Math.min(bounds.minY, cell.y),
+        maxX: Math.max(bounds.maxX, cell.x),
+        maxY: Math.max(bounds.maxY, cell.y)
+      }), {
+        minX: cells[0].x,
+        minY: cells[0].y,
+        maxX: cells[0].x,
+        maxY: cells[0].y
+      });
+    }
+
+    function setSelectionFromCells(cells, explicitBounds = null) {
+      selectionMask = makeGrid(width, height).map((row) => row.map(() => false));
+      cells.forEach((cell) => {
+        if (cell.x >= 0 && cell.y >= 0 && cell.x < width && cell.y < height) {
+          selectionMask[cell.y][cell.x] = true;
+        }
+      });
+      selectionBounds = explicitBounds || boundsForCells(cells);
+      updateSelectionControls();
+    }
+
+    function pointInPolygon(point, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+        const current = polygon[i];
+        const previous = polygon[j];
+        const crosses = (current.y > point.y) !== (previous.y > point.y);
+        if (crosses) {
+          const xAtY = ((previous.x - current.x) * (point.y - current.y)) / (previous.y - current.y) + current.x;
+          if (point.x < xAtY) {
+            inside = !inside;
+          }
+        }
+      }
+      return inside;
+    }
+
+    function addUniqueCell(cells, seen, x, y) {
+      if (x < 0 || y < 0 || x >= width || y >= height) {
+        return;
+      }
+      const key = `${x},${y}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        cells.push({ x, y, color: pixels[y][x] });
+      }
+    }
+
+    function addLineCells(cells, seen, start, end) {
+      let x0 = start.x;
+      let y0 = start.y;
+      const x1 = end.x;
+      const y1 = end.y;
+      const dx = Math.abs(x1 - x0);
+      const sx = x0 < x1 ? 1 : -1;
+      const dy = -Math.abs(y1 - y0);
+      const sy = y0 < y1 ? 1 : -1;
+      let error = dx + dy;
+
+      while (true) {
+        addUniqueCell(cells, seen, x0, y0);
+        if (x0 === x1 && y0 === y1) {
+          break;
+        }
+        const e2 = 2 * error;
+        if (e2 >= dy) {
+          error += dy;
+          x0 += sx;
+        }
+        if (e2 <= dx) {
+          error += dx;
+          y0 += sy;
+        }
+      }
+    }
+
+    function addLassoPathCells(cells, seen) {
+      for (let i = 1; i < lassoPoints.length; i += 1) {
+        addLineCells(cells, seen, lassoPoints[i - 1], lassoPoints[i]);
+      }
+      if (lassoPoints.length > 2) {
+        addLineCells(cells, seen, lassoPoints[lassoPoints.length - 1], lassoPoints[0]);
+      }
+    }
+
+    function addLassoBoundsCells(cells, seen) {
+      const bounds = boundsForCells(lassoPoints.map((point) => ({ ...point, color: pixels[point.y][point.x] })));
+      if (!bounds) {
+        return;
+      }
+      for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+          addUniqueCell(cells, seen, x, y);
+        }
+      }
+    }
+
+    function paintedCellsOnly(cells) {
+      const seen = new Set();
+      const painted = [];
+      cells.forEach((cell) => {
+        if (!pixels[cell.y] || !pixels[cell.y][cell.x]) {
+          return;
+        }
+        const key = `${cell.x},${cell.y}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          painted.push({ x: cell.x, y: cell.y, color: pixels[cell.y][cell.x] });
+        }
+      });
+      return painted;
+    }
+
+    function finishLassoSelection() {
+      if (lassoPoints.length < 2) {
+        clearSelection();
+        render();
+        setNotice("選択したい範囲をなぞってください");
+        return;
+      }
+
+      const polygon = lassoPoints.map((point) => ({ x: point.x + 0.5, y: point.y + 0.5 }));
+      const cells = [];
+      const seen = new Set();
+
+      addLassoPathCells(cells, seen);
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (pointInPolygon({ x: x + 0.5, y: y + 0.5 }, polygon)) {
+            addUniqueCell(cells, seen, x, y);
+          }
+        }
+      }
+
+      if (!cells.length) {
+        addLassoBoundsCells(cells, seen);
+      }
+
+      const paintedCells = paintedCellsOnly(cells);
+      lassoPoints = [];
+      if (!paintedCells.length) {
+        clearSelection();
+        setNotice("描画済みのマスが選択範囲内にありません");
+      } else {
+        setSelectionFromCells(paintedCells);
+        setNotice(`${paintedCells.length} マスを選択しました`);
+      }
+      render();
+    }
+
+    function finishActiveLasso() {
+      if (!drawing || activeTool !== "lasso") {
+        return;
+      }
+      drawing = false;
+      activePointerId = null;
+      finishLassoSelection();
+    }
+
+    function startSelectionMove(cell) {
+      movingSelection = true;
+      moveStartCell = cell;
+      moveBasePixels = cloneGrid(pixels);
+      moveCells = selectedCells();
+      moveBounds = selectionBounds;
+      moveDelta = { x: 0, y: 0 };
+      moveHasChanged = false;
+      moveKeepsOriginal = duplicateSelectionOnMove;
+      setNotice("選択範囲をドラッグして移動できます");
+    }
+
+    function clampedMoveDelta(cell) {
+      let dx = cell.x - moveStartCell.x;
+      let dy = cell.y - moveStartCell.y;
+
+      dx = Math.max(-moveBounds.minX, Math.min(width - 1 - moveBounds.maxX, dx));
+      dy = Math.max(-moveBounds.minY, Math.min(height - 1 - moveBounds.maxY, dy));
+
+      return { x: dx, y: dy };
+    }
+
+    function applySelectionMove(cell) {
+      if (!movingSelection || !cell || !moveBounds) {
+        return;
+      }
+
+      const nextDelta = clampedMoveDelta(cell);
+      if (nextDelta.x === moveDelta.x && nextDelta.y === moveDelta.y) {
+        return;
+      }
+
+      if (!moveHasChanged) {
+        pushHistory();
+        moveHasChanged = true;
+      }
+
+      moveDelta = nextDelta;
+      setActivePixels(cloneGrid(moveBasePixels));
+
+      if (!moveKeepsOriginal) {
+        moveCells.forEach((cellData) => {
+          pixels[cellData.y][cellData.x] = null;
+        });
+      }
+
+      const movedCells = moveCells.map((cellData) => ({
+        x: cellData.x + moveDelta.x,
+        y: cellData.y + moveDelta.y,
+        color: cellData.color
+      }));
+
+      movedCells.forEach((cellData) => {
+        if (cellData.color) {
+          pixels[cellData.y][cellData.x] = cellData.color;
+        }
+      });
+
+      setSelectionFromCells(movedCells);
+      render();
+    }
+
+    function finishSelectionMove() {
+      if (!movingSelection) {
+        return;
+      }
+
+      const wasCopyMove = moveKeepsOriginal;
+      const wasChanged = moveHasChanged;
+      movingSelection = false;
+      drawing = false;
+      activePointerId = null;
+      moveStartCell = null;
+      moveBasePixels = null;
+      moveCells = [];
+      moveBounds = null;
+      duplicateSelectionOnMove = wasCopyMove && !wasChanged;
+      moveKeepsOriginal = false;
+
+      if (wasChanged) {
+        setNotice(wasCopyMove ? "コピーした選択範囲を移動しました" : "選択範囲を移動しました");
+      }
+
+      moveDelta = { x: 0, y: 0 };
+      moveHasChanged = false;
+      render();
+    }
+
+    function nudgeSelection(dx, dy) {
+      if (!selectionMask || !selectionBounds || resizingSelection || movingSelection || drawing) {
+        return false;
+      }
+      if (
+        selectionBounds.minX + dx < 0
+        || selectionBounds.maxX + dx >= width
+        || selectionBounds.minY + dy < 0
+        || selectionBounds.maxY + dy >= height
+      ) {
+        return false;
+      }
+
+      const cells = selectedCells();
+      pushHistory();
+      cells.forEach((cellData) => {
+        pixels[cellData.y][cellData.x] = null;
+      });
+
+      const movedCells = cells.map((cellData) => ({
+        x: cellData.x + dx,
+        y: cellData.y + dy,
+        color: cellData.color
+      }));
+
+      movedCells.forEach((cellData) => {
+        if (cellData.color) {
+          pixels[cellData.y][cellData.x] = cellData.color;
+        }
+      });
+
+      setSelectionFromCells(movedCells);
+      render();
+      return true;
+    }
+
+    function gridPointFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = canvasMetrics.size / rect.width;
+      return {
+        x: ((event.clientX - rect.left) * scale - canvasMetrics.offsetX) / canvasMetrics.cell,
+        y: ((event.clientY - rect.top) * scale - canvasMetrics.offsetY) / canvasMetrics.cell
+      };
+    }
+
+    function sizeForCenteredBounds(size, center, maxSize) {
+      let nextSize = Math.max(1, Math.min(maxSize, size));
+      const needsOddSize = Math.abs(center - Math.round(center)) > 0.001;
+      if ((nextSize % 2 === 1) !== needsOddSize) {
+        if (nextSize < maxSize) {
+          nextSize += 1;
+        } else if (nextSize > 1) {
+          nextSize -= 1;
+        }
+      }
+      return nextSize;
+    }
+
+    function resizeBoundsForPointer(event) {
+      const sourceWidth = resizeSourceBounds.maxX - resizeSourceBounds.minX + 1;
+      const sourceHeight = resizeSourceBounds.maxY - resizeSourceBounds.minY + 1;
+      const pointer = gridPointFromEvent(event);
+      const centerX = (resizeSourceBounds.minX + resizeSourceBounds.maxX + 1) / 2;
+      const centerY = (resizeSourceBounds.minY + resizeSourceBounds.maxY + 1) / 2;
+      const directionX = resizeHandle === "ne" || resizeHandle === "se" ? 1 : -1;
+      const directionY = resizeHandle === "sw" || resizeHandle === "se" ? 1 : -1;
+      const movingEdgeX = pointer.x + resizePointerOffset.x;
+      const movingEdgeY = pointer.y + resizePointerOffset.y;
+      const rawWidth = Math.max(1, Math.round(Math.max(0.5, (movingEdgeX - centerX) * directionX) * 2));
+      const rawHeight = Math.max(1, Math.round(Math.max(0.5, (movingEdgeY - centerY) * directionY) * 2));
+      const maxNextWidth = Math.max(1, Math.floor(Math.min(centerX, width - centerX) * 2));
+      const maxNextHeight = Math.max(1, Math.floor(Math.min(centerY, height - centerY) * 2));
+      let nextWidth = rawWidth;
+      let nextHeight = rawHeight;
+      if (event.shiftKey) {
+        const scaleX = rawWidth / sourceWidth;
+        const scaleY = rawHeight / sourceHeight;
+        const maxScale = Math.max(1 / Math.max(sourceWidth, sourceHeight), Math.min(maxNextWidth / sourceWidth, maxNextHeight / sourceHeight));
+        const nextScale = Math.max(1 / Math.max(sourceWidth, sourceHeight), Math.min(maxScale, Math.max(scaleX, scaleY)));
+        nextWidth = Math.round(sourceWidth * nextScale);
+        nextHeight = Math.round(sourceHeight * nextScale);
+      }
+      nextWidth = sizeForCenteredBounds(nextWidth, centerX, maxNextWidth);
+      nextHeight = sizeForCenteredBounds(nextHeight, centerY, maxNextHeight);
+      const minX = Math.round(centerX - nextWidth / 2);
+      const minY = Math.round(centerY - nextHeight / 2);
+      return {
+        minX: Math.max(0, Math.min(width - nextWidth, minX)),
+        minY: Math.max(0, Math.min(height - nextHeight, minY)),
+        width: nextWidth,
+        height: nextHeight
+      };
+    }
+
+    function scaledSelectionCells(nextBounds) {
+      const sourceWidth = resizeSourceBounds.maxX - resizeSourceBounds.minX + 1;
+      const sourceHeight = resizeSourceBounds.maxY - resizeSourceBounds.minY + 1;
+      const sourceCenterX = (resizeSourceBounds.minX + resizeSourceBounds.maxX + 1) / 2;
+      const sourceCenterY = (resizeSourceBounds.minY + resizeSourceBounds.maxY + 1) / 2;
+      const nextCenterX = nextBounds.minX + nextBounds.width / 2;
+      const nextCenterY = nextBounds.minY + nextBounds.height / 2;
+      const scaleX = nextBounds.width / sourceWidth;
+      const scaleY = nextBounds.height / sourceHeight;
+      const cells = [];
+
+      for (let y = 0; y < nextBounds.height; y += 1) {
+        for (let x = 0; x < nextBounds.width; x += 1) {
+          const sourceEdgeX = sourceCenterX + (nextBounds.minX + x + 0.5 - nextCenterX) / scaleX;
+          const sourceEdgeY = sourceCenterY + (nextBounds.minY + y + 0.5 - nextCenterY) / scaleY;
+          const sourceX = Math.max(
+            resizeSourceBounds.minX,
+            Math.min(resizeSourceBounds.maxX, Math.floor(sourceEdgeX))
+          );
+          const sourceY = Math.max(
+            resizeSourceBounds.minY,
+            Math.min(resizeSourceBounds.maxY, Math.floor(sourceEdgeY))
+          );
+          if (resizeSourceMask[sourceY] && resizeSourceMask[sourceY][sourceX]) {
+            cells.push({
+              x: nextBounds.minX + x,
+              y: nextBounds.minY + y,
+              color: resizeBasePixels[sourceY][sourceX]
+            });
+          }
+        }
+      }
+
+      return cells;
+    }
+
+    function startSelectionResize(handle, event) {
+      resizingSelection = true;
+      resizeBasePixels = cloneGrid(pixels);
+      resizeSourceCells = selectedCells();
+      resizeSourceBounds = { ...selectionBounds };
+      resizeSourceMask = selectionMask.map((row) => row.slice());
+      resizeHandle = handle;
+      resizeHasChanged = false;
+      resizeLastSignature = `${selectionBounds.minX},${selectionBounds.minY},${selectionBounds.maxX - selectionBounds.minX + 1},${selectionBounds.maxY - selectionBounds.minY + 1}`;
+      const pointer = gridPointFromEvent(event);
+      const handleEdgeX = handle === "ne" || handle === "se" ? selectionBounds.maxX + 1 : selectionBounds.minX;
+      const handleEdgeY = handle === "sw" || handle === "se" ? selectionBounds.maxY + 1 : selectionBounds.minY;
+      resizePointerOffset = {
+        x: handleEdgeX - pointer.x,
+        y: handleEdgeY - pointer.y
+      };
+      duplicateSelectionOnMove = false;
+      setNotice("選択範囲の角をドラッグして拡大縮小できます");
+    }
+
+    function applySelectionResize(event) {
+      if (!resizingSelection || !resizeSourceBounds) {
+        return;
+      }
+
+      const nextBounds = resizeBoundsForPointer(event);
+      const signature = `${nextBounds.minX},${nextBounds.minY},${nextBounds.width},${nextBounds.height}`;
+      if (signature === resizeLastSignature) {
+        return;
+      }
+
+      if (!resizeHasChanged) {
+        pushHistory();
+        resizeHasChanged = true;
+      }
+      resizeLastSignature = signature;
+
+      setActivePixels(cloneGrid(resizeBasePixels));
+      resizeSourceCells.forEach((cellData) => {
+        pixels[cellData.y][cellData.x] = null;
+      });
+
+      const nextCells = scaledSelectionCells(nextBounds);
+      nextCells.forEach((cellData) => {
+        pixels[cellData.y][cellData.x] = cellData.color;
+      });
+
+      setSelectionFromCells(nextCells, {
+        minX: nextBounds.minX,
+        minY: nextBounds.minY,
+        maxX: nextBounds.minX + nextBounds.width - 1,
+        maxY: nextBounds.minY + nextBounds.height - 1
+      });
+      render();
+    }
+
+    function finishSelectionResize() {
+      if (!resizingSelection) {
+        return;
+      }
+
+      resizingSelection = false;
+      drawing = false;
+      activePointerId = null;
+      resizeBasePixels = null;
+      resizeSourceCells = [];
+      resizeSourceBounds = null;
+      resizeSourceMask = null;
+      resizeHandle = null;
+      resizePointerOffset = { x: 0, y: 0 };
+
+      if (resizeHasChanged) {
+        setNotice("選択範囲を拡大縮小しました");
+      }
+
+      resizeHasChanged = false;
+      resizeLastSignature = "";
+      render();
+    }
+
+    function finishPointerAction() {
+      if (resizingSelection) {
+        finishSelectionResize();
+        return;
+      }
+      if (movingSelection) {
+        finishSelectionMove();
+        return;
+      }
+      if (isShapeTool() && drawing) {
+        shapeStartCell = null;
+        shapeCurrentCell = null;
+        shapeShiftKey = false;
+        drawing = false;
+        activePointerId = null;
+        render();
+        return;
+      }
+      lastPaintCell = null;
+      strokeStartCell = null;
+      strokeBasePixels = null;
+      finishActiveLasso();
+    }
+
+    function syncSizeControls() {
+      gridWidth.value = width;
+      gridHeight.value = height;
+      if (width === height && [32, 64, 128].includes(width)) {
+        sizePreset.value = String(width);
+      } else {
+        sizePreset.value = "custom";
+      }
+    }
+
+    function pushHistory() {
+      history.push({
+        width,
+        height,
+        layers: cloneLayers(layers),
+        activeLayerIndex,
+        layerIdCounter
+      });
+      if (history.length > 40) {
+        history.shift();
+      }
+    }
+
+    function undo() {
+      const previous = history.pop();
+      if (!previous) {
+        setNotice("Nothing to undo");
+        return;
+      }
+      width = previous.width;
+      height = previous.height;
+      layerIdCounter = previous.layerIdCounter;
+      setLayers(cloneLayers(previous.layers), previous.activeLayerIndex);
+      clearSelection();
+      syncSizeControls();
+      render();
+      renderLayerList();
+      setNotice("元に戻しました");
+    }
+
+    function cellFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = canvasMetrics.size / rect.width;
+      const localX = (event.clientX - rect.left) * scale - canvasMetrics.offsetX;
+      const localY = (event.clientY - rect.top) * scale - canvasMetrics.offsetY;
+      const x = Math.floor(localX / canvasMetrics.cell);
+      const y = Math.floor(localY / canvasMetrics.cell);
+      if (x < 0 || y < 0 || x >= width || y >= height) {
+        return null;
+      }
+      return { x, y };
+    }
+
+    function updateCanvasCursor(cell, event = null) {
+      if (activeTool !== "lasso") {
+        canvas.style.cursor = "crosshair";
+        return;
+      }
+      if (resizingSelection) {
+        canvas.style.cursor = cursorForResizeHandle(resizeHandle);
+        return;
+      }
+      const handle = event ? selectionHandleFromEvent(event) : null;
+      if (handle) {
+        canvas.style.cursor = cursorForResizeHandle(handle);
+        return;
+      }
+      canvas.style.cursor = movingSelection || isInsideSelectionBounds(cell) ? "move" : "crosshair";
+    }
+
+    function paintCell(x, y, color) {
+      if (pixels[y][x] === color) {
+        return false;
+      }
+      pixels[y][x] = color;
+      return true;
+    }
+
+    function isShapeTool(tool = activeTool) {
+      return tool === "circle" || tool === "rect";
+    }
+
+    function cellsForBrush(center) {
+      const cells = [];
+      const size = Math.max(1, Math.min(32, brushSize));
+      const start = -Math.floor((size - 1) / 2);
+      const end = Math.ceil((size - 1) / 2);
+      for (let y = center.y + start; y <= center.y + end; y += 1) {
+        for (let x = center.x + start; x <= center.x + end; x += 1) {
+          if (x >= 0 && y >= 0 && x < width && y < height) {
+            cells.push({ x, y });
+          }
+        }
+      }
+      return cells;
+    }
+
+    function paintBrush(center, color) {
+      let changed = false;
+      cellsForBrush(center).forEach((cell) => {
+        changed = paintCell(cell.x, cell.y, color) || changed;
+      });
+      return changed;
+    }
+
+    function paintBrushLine(from, to, color) {
+      const steps = Math.max(Math.abs(to.x - from.x), Math.abs(to.y - from.y), 1);
+      let changed = false;
+      for (let i = 0; i <= steps; i += 1) {
+        const t = i / steps;
+        const cell = {
+          x: Math.round(from.x + (to.x - from.x) * t),
+          y: Math.round(from.y + (to.y - from.y) * t)
+        };
+        changed = paintBrush(cell, color) || changed;
+      }
+      return changed;
+    }
+
+    function centeredShapeBounds(start, current, constrain) {
+      let rx = Math.abs(current.x - start.x);
+      let ry = Math.abs(current.y - start.y);
+      if (constrain) {
+        const radius = Math.max(rx, ry);
+        rx = radius;
+        ry = radius;
+      }
+      return {
+        minX: Math.max(0, start.x - rx),
+        maxX: Math.min(width - 1, start.x + rx),
+        minY: Math.max(0, start.y - ry),
+        maxY: Math.min(height - 1, start.y + ry),
+        rx,
+        ry
+      };
+    }
+
+    function cornerShapeBounds(start, current, constrain) {
+      let shapeWidth = Math.abs(current.x - start.x);
+      let shapeHeight = Math.abs(current.y - start.y);
+      if (constrain) {
+        const size = Math.max(shapeWidth, shapeHeight);
+        shapeWidth = size;
+        shapeHeight = size;
+      }
+      return {
+        minX: start.x,
+        maxX: Math.min(width - 1, start.x + shapeWidth),
+        minY: start.y,
+        maxY: Math.min(height - 1, start.y + shapeHeight),
+        rx: shapeWidth,
+        ry: shapeHeight
+      };
+    }
+
+    function triangleCornerBounds(start, current, constrain) {
+      let shapeWidth = Math.abs(current.x - start.x);
+      let shapeHeight = Math.abs(current.y - start.y);
+      if (constrain) {
+        const triangleHeightRatio = Math.sqrt(3) / 2;
+        const side = Math.max(shapeWidth, Math.round(shapeHeight / triangleHeightRatio));
+        shapeWidth = side;
+        shapeHeight = Math.max(1, Math.round(side * triangleHeightRatio));
+      }
+      return {
+        minX: start.x,
+        maxX: Math.min(width - 1, start.x + shapeWidth),
+        minY: start.y,
+        maxY: Math.min(height - 1, start.y + shapeHeight),
+        rx: shapeWidth,
+        ry: shapeHeight
+      };
+    }
+
+    function boundsForShape(tool, start, current, constrain) {
+      if (tool === "rect") {
+        return cornerShapeBounds(start, current, constrain);
+      }
+      if (tool === "triangle") {
+        return triangleCornerBounds(start, current, constrain);
+      }
+      return centeredShapeBounds(start, current, constrain);
+    }
+
+    function rectShapeCells(bounds, style) {
+      const cells = [];
+      for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+          const edge = x === bounds.minX || x === bounds.maxX || y === bounds.minY || y === bounds.maxY;
+          if (style === "fill" || edge) {
+            cells.push({ x, y });
+          }
+        }
+      }
+      return cells;
+    }
+
+    function circleShapeCells(start, bounds, style) {
+      const cells = [];
+      const rx = Math.max(bounds.rx - 0.5, 0.5);
+      const ry = Math.max(bounds.ry - 0.5, 0.5);
+      for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+          const nx = (x - start.x) / rx;
+          const ny = (y - start.y) / ry;
+          const value = nx * nx + ny * ny;
+          if (style === "fill" ? value <= 1 : value <= 1 && value >= Math.max(0, 1 - 1.8 / Math.max(rx, ry))) {
+            cells.push({ x, y });
+          }
+        }
+      }
+      return cells;
+    }
+
+    function pointInTriangle(px, py, a, b, c) {
+      const area = (p1, p2, p3) => (
+        (p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2
+      );
+      const total = Math.abs(area(a, b, c));
+      const a1 = Math.abs(area({ x: px, y: py }, b, c));
+      const a2 = Math.abs(area(a, { x: px, y: py }, c));
+      const a3 = Math.abs(area(a, b, { x: px, y: py }));
+      return Math.abs(total - (a1 + a2 + a3)) < 0.01;
+    }
+
+    function triangleShapeCells(start, bounds, style) {
+      const topX = (bounds.minX + bounds.maxX) / 2;
+      const vertices = [
+        { x: topX, y: bounds.minY },
+        { x: bounds.maxX, y: bounds.maxY },
+        { x: bounds.minX, y: bounds.maxY }
+      ];
+      const filled = [];
+      for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+          if (pointInTriangle(x, y, vertices[0], vertices[1], vertices[2])) {
+            filled.push({ x, y });
+          }
+        }
+      }
+      if (style === "fill") {
+        return filled;
+      }
+      const filledKeys = new Set(filled.map((cell) => `${cell.x},${cell.y}`));
+      return filled.filter((cell) => (
+        !filledKeys.has(`${cell.x - 1},${cell.y}`)
+        || !filledKeys.has(`${cell.x + 1},${cell.y}`)
+        || !filledKeys.has(`${cell.x},${cell.y - 1}`)
+        || !filledKeys.has(`${cell.x},${cell.y + 1}`)
+      ));
+    }
+
+    function expandedCells(cells) {
+      if (brushSize <= 1) {
+        return cells;
+      }
+      const expanded = new Map();
+      cells.forEach((cell) => {
+        cellsForBrush(cell).forEach((brushCell) => {
+          expanded.set(`${brushCell.x},${brushCell.y}`, brushCell);
+        });
+      });
+      return Array.from(expanded.values());
+    }
+
+    function shapeCells(tool, start, current, constrain, style) {
+      if (!start || !current) {
+        return [];
+      }
+      const bounds = boundsForShape(tool, start, current, constrain);
+      let cells = [];
+      if (tool === "circle") {
+        cells = circleShapeCells(start, bounds, style);
+      } else if (tool === "triangle") {
+        cells = triangleShapeCells(start, bounds, style);
+      } else {
+        cells = rectShapeCells(bounds, style);
+      }
+      return style === "stroke" ? expandedCells(cells) : cells;
+    }
+
+    function applyActiveShape() {
+      const cells = shapeCells(activeTool, shapeStartCell, shapeCurrentCell, shapeShiftKey, shapeStyle);
+      if (!cells.length) {
+        return;
+      }
+      pushHistory();
+      cells.forEach((cell) => {
+        paintCell(cell.x, cell.y, activeColor);
+      });
+      render();
+    }
+
+    function floodFill(x, y, color) {
+      const target = pixels[y][x];
+      if (target === color) {
+        return;
+      }
+      pushHistory();
+      const stack = [[x, y]];
+      while (stack.length) {
+        const [cx, cy] = stack.pop();
+        if (cx < 0 || cy < 0 || cx >= width || cy >= height || pixels[cy][cx] !== target) {
+          continue;
+        }
+        pixels[cy][cx] = color;
+        stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+      }
+      render();
+    }
+
+    function handleCell(cell) {
+      if (!cell) {
+        return;
+      }
+
+      if (activeTool === "pick") {
+        const color = compositeColorAt(cell.x, cell.y);
+        if (color) {
+          setActiveColor(color);
+          setTool("draw");
+        }
+        return;
+      }
+
+      if (activeTool === "fill") {
+        floodFill(cell.x, cell.y, activeColor);
+        return;
+      }
+
+      const color = activeTool === "erase" ? null : activeColor;
+      const changed = lastPaintCell
+        ? paintBrushLine(lastPaintCell, cell, color)
+        : paintBrush(cell, color);
+      lastPaintCell = cell;
+      if (changed) {
+        render();
+      }
+    }
+
+    function applyStraightStroke(cell) {
+      if (!cell || !strokeStartCell || !strokeBasePixels) {
+        return;
+      }
+      const color = activeTool === "erase" ? null : activeColor;
+      setActivePixels(cloneGrid(strokeBasePixels));
+      paintBrushLine(strokeStartCell, cell, color);
+      lastPaintCell = cell;
+      render();
+    }
+
+    async function renderTextAt(cell) {
+      if (!cell) {
+        return;
+      }
+      const text = textInput.value || "";
+      if (!text.trim()) {
+        setNotice("テキストを入力してください");
+        return;
+      }
+
+      const fontFamily = textFont.value === "misaki_mincho" ? "misaki_mincho" : "misaki_gothic";
+      if (document.fonts && document.fonts.load) {
+        try {
+          await document.fonts.load(`8px ${fontFamily}`, text);
+        } catch (error) {
+          // Fall back to the browser font if the webfont cannot be loaded.
+        }
+      }
+
+      const fontSize = 8;
+      const lines = text.replace(/\r/g, "").split("\n");
+      const textCanvas = document.createElement("canvas");
+      const textCtx = textCanvas.getContext("2d");
+      textCtx.font = `${fontSize}px ${fontFamily}, monospace`;
+      textCtx.textBaseline = "top";
+      textCtx.imageSmoothingEnabled = false;
+
+      if (textDirection === "vertical") {
+        const maxChars = Math.max(1, ...lines.map((line) => Array.from(line).length));
+        textCanvas.width = Math.max(1, lines.length * fontSize);
+        textCanvas.height = Math.max(1, maxChars * fontSize);
+        textCtx.font = `${fontSize}px ${fontFamily}, monospace`;
+        textCtx.textBaseline = "top";
+        textCtx.fillStyle = "#000000";
+        lines.forEach((line, column) => {
+          Array.from(line).forEach((char, row) => {
+            textCtx.fillText(char, column * fontSize, row * fontSize);
+          });
+        });
+      } else {
+        const maxLineWidth = Math.max(1, ...lines.map((line) => Math.ceil(textCtx.measureText(line || " ").width)));
+        textCanvas.width = maxLineWidth;
+        textCanvas.height = Math.max(1, lines.length * fontSize);
+        textCtx.font = `${fontSize}px ${fontFamily}, monospace`;
+        textCtx.textBaseline = "top";
+        textCtx.fillStyle = "#000000";
+        lines.forEach((line, row) => {
+          textCtx.fillText(line, 0, row * fontSize);
+        });
+      }
+
+      const image = textCtx.getImageData(0, 0, textCanvas.width, textCanvas.height);
+      let changed = false;
+      pushHistory();
+      for (let y = 0; y < image.height; y += 1) {
+        for (let x = 0; x < image.width; x += 1) {
+          const alpha = image.data[(y * image.width + x) * 4 + 3];
+          if (alpha < 64) {
+            continue;
+          }
+          const targetX = cell.x + x;
+          const targetY = cell.y + y;
+          if (targetX >= 0 && targetY >= 0 && targetX < width && targetY < height) {
+            changed = paintCell(targetX, targetY, activeColor) || changed;
+          }
+        }
+      }
+
+      if (changed) {
+        render();
+      } else {
+        history.pop();
+        setNotice("キャンバス内に描画できる文字がありません");
+      }
+    }
+
+    function drawChecker(context, w, h, cell) {
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, w, h);
+      context.fillStyle = "#e3e8ef";
+      for (let y = 0; y < h; y += cell) {
+        for (let x = 0; x < w; x += cell) {
+          if (((x / cell) + (y / cell)) % 2 === 0) {
+            context.fillRect(x, y, cell, cell);
+          }
+        }
+      }
+    }
+
+    function isSelectionMaskCell(x, y) {
+      return Boolean(
+        selectionMask
+        && y >= 0
+        && y < height
+        && x >= 0
+        && x < width
+        && selectionMask[y][x]
+      );
+    }
+
+    function drawSelectionMaskOutline(cell, offsetX, offsetY) {
+      ctx.save();
+      ctx.strokeStyle = "#0b5f59";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (!isSelectionMaskCell(x, y)) {
+            continue;
+          }
+          const left = offsetX + x * cell;
+          const right = offsetX + (x + 1) * cell;
+          const top = offsetY + y * cell;
+          const bottom = offsetY + (y + 1) * cell;
+          if (!isSelectionMaskCell(x, y - 1)) {
+            ctx.moveTo(left, top);
+            ctx.lineTo(right, top);
+          }
+          if (!isSelectionMaskCell(x + 1, y)) {
+            ctx.moveTo(right, top);
+            ctx.lineTo(right, bottom);
+          }
+          if (!isSelectionMaskCell(x, y + 1)) {
+            ctx.moveTo(right, bottom);
+            ctx.lineTo(left, bottom);
+          }
+          if (!isSelectionMaskCell(x - 1, y)) {
+            ctx.moveTo(left, bottom);
+            ctx.lineTo(left, top);
+          }
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSelectionBoundsGuide(cell, offsetX, offsetY) {
+      ctx.save();
+      ctx.strokeStyle = "#0b5f59";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(
+        offsetX + selectionBounds.minX * cell,
+        offsetY + selectionBounds.minY * cell,
+        (selectionBounds.maxX - selectionBounds.minX + 1) * cell,
+        (selectionBounds.maxY - selectionBounds.minY + 1) * cell
+      );
+      ctx.restore();
+    }
+
+    function drawSelectionOverlay(cell, offsetX, offsetY) {
+      if (selectionMask && selectionBounds) {
+        ctx.fillStyle = "rgba(15, 118, 110, 0.18)";
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            if (selectionMask[y][x]) {
+              ctx.fillRect(offsetX + x * cell, offsetY + y * cell, Math.ceil(cell), Math.ceil(cell));
+            }
+          }
+        }
+
+        drawSelectionMaskOutline(cell, offsetX, offsetY);
+
+        if (activeTool === "lasso") {
+          drawSelectionBoundsGuide(cell, offsetX, offsetY);
+          const handleSize = Math.max(8, Math.min(14, cell * 0.7));
+          const handleHalf = handleSize / 2;
+          const corners = [
+            [offsetX + selectionBounds.minX * cell, offsetY + selectionBounds.minY * cell],
+            [offsetX + (selectionBounds.maxX + 1) * cell, offsetY + selectionBounds.minY * cell],
+            [offsetX + selectionBounds.minX * cell, offsetY + (selectionBounds.maxY + 1) * cell],
+            [offsetX + (selectionBounds.maxX + 1) * cell, offsetY + (selectionBounds.maxY + 1) * cell]
+          ];
+          ctx.save();
+          ctx.setLineDash([]);
+          ctx.fillStyle = "#ffffff";
+          ctx.strokeStyle = "#0b5f59";
+          ctx.lineWidth = 2;
+          corners.forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.rect(x - handleHalf, y - handleHalf, handleSize, handleSize);
+            ctx.fill();
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+      }
+
+      if (activeTool === "lasso" && drawing && lassoPoints.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = "#0b5f59";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        lassoPoints.forEach((point, index) => {
+          const x = offsetX + (point.x + 0.5) * cell;
+          const y = offsetY + (point.y + 0.5) * cell;
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawShapePreview(cell, offsetX, offsetY) {
+      if (!drawing || !isShapeTool() || !shapeStartCell || !shapeCurrentCell) {
+        return;
+      }
+      const cells = shapeCells(activeTool, shapeStartCell, shapeCurrentCell, shapeShiftKey, shapeStyle);
+      ctx.save();
+      ctx.globalAlpha = 0.58;
+      ctx.fillStyle = activeColor;
+      cells.forEach((previewCell) => {
+        ctx.fillRect(offsetX + previewCell.x * cell, offsetY + previewCell.y * cell, Math.ceil(cell), Math.ceil(cell));
+      });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "#0b5f59";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      const bounds = boundsForShape(activeTool, shapeStartCell, shapeCurrentCell, shapeShiftKey);
+      ctx.strokeRect(
+        offsetX + bounds.minX * cell,
+        offsetY + bounds.minY * cell,
+        (bounds.maxX - bounds.minX + 1) * cell,
+        (bounds.maxY - bounds.minY + 1) * cell
+      );
+      ctx.restore();
+    }
+
+    function render() {
+      const rect = canvas.getBoundingClientRect();
+      const displaySize = Math.max(320, Math.round(Math.min(rect.width || 720, rect.height || 720)));
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = displaySize * dpr;
+      canvas.height = displaySize * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+
+      const cell = displaySize / Math.max(width, height);
+      const offsetX = (displaySize - cell * width) / 2;
+      const offsetY = (displaySize - cell * height) / 2;
+      canvasMetrics = {
+        size: displaySize,
+        cell,
+        offsetX,
+        offsetY
+      };
+
+      ctx.clearRect(0, 0, displaySize, displaySize);
+      drawChecker(ctx, displaySize, displaySize, Math.max(8, cell));
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(offsetX, offsetY, cell * width, cell * height);
+
+      drawVisibleLayers(ctx, cell, offsetX, offsetY);
+
+      ctx.strokeStyle = cell >= 9 ? "rgba(23, 32, 38, 0.18)" : "rgba(23, 32, 38, 0.08)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= width; x += 1) {
+        const px = offsetX + x * cell;
+        ctx.beginPath();
+        ctx.moveTo(px, offsetY);
+        ctx.lineTo(px, offsetY + height * cell);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= height; y += 1) {
+        const py = offsetY + y * cell;
+        ctx.beginPath();
+        ctx.moveTo(offsetX, py);
+        ctx.lineTo(offsetX + width * cell, py);
+        ctx.stroke();
+      }
+
+      drawSelectionOverlay(cell, offsetX, offsetY);
+      drawShapePreview(cell, offsetX, offsetY);
+      renderPreview();
+      updateStats();
+    }
+
+    function renderPreview() {
+      previewCtx.imageSmoothingEnabled = false;
+      drawChecker(previewCtx, preview.width, preview.height, 10);
+      const cell = Math.floor(Math.min(preview.width / width, preview.height / height));
+      const offsetX = Math.floor((preview.width - cell * width) / 2);
+      const offsetY = Math.floor((preview.height - cell * height) / 2);
+      previewCtx.fillStyle = "#ffffff";
+      previewCtx.fillRect(offsetX, offsetY, cell * width, cell * height);
+      drawVisibleLayers(previewCtx, cell, offsetX, offsetY);
+    }
+
+    function updateStats() {
+      const filled = pixels.reduce((total, row) => total + row.filter(Boolean).length, 0);
+      sizeLabel.textContent = `${width} x ${height}`;
+      filledLabel.textContent = `${filled} マス着色`;
+    }
+
+    function updateSwatches() {
+      paletteEl.querySelectorAll(".swatch").forEach((button) => {
+        button.classList.toggle("active", button.dataset.color === activeColor);
+      });
+    }
+
+    function resizeGrid(nextWidth, nextHeight) {
+      const safeWidth = Math.max(8, Math.min(128, nextWidth));
+      const safeHeight = Math.max(8, Math.min(128, nextHeight));
+      pushHistory();
+      const resizedLayers = layers.map((layer) => {
+        const next = makeGrid(safeWidth, safeHeight);
+        for (let y = 0; y < Math.min(height, safeHeight); y += 1) {
+          for (let x = 0; x < Math.min(width, safeWidth); x += 1) {
+            next[y][x] = layer.pixels[y][x];
+          }
+        }
+        return {
+          ...layer,
+          pixels: next
+        };
+      });
+      width = safeWidth;
+      height = safeHeight;
+      setLayers(resizedLayers, activeLayerIndex);
+      clearSelection();
+      syncSizeControls();
+      render();
+      renderLayerList();
+      setNotice("キャンバスサイズを変更しました");
+    }
+
+    function clearGrid() {
+      pushHistory();
+      setLayers([createLayer("レイヤー 1")]);
+      clearSelection();
+      render();
+      renderLayerList();
+      setNotice("白紙にしました");
+    }
+
+    function addNewLayer() {
+      pushHistory();
+      editingLayerIndex = null;
+      layers.push(createLayer(`レイヤー ${layers.length + 1}`));
+      activeLayerIndex = layers.length - 1;
+      syncActivePixels();
+      clearSelection();
+      renderLayerList();
+      render();
+      setNotice(`${activeLayer().name}を追加しました`);
+    }
+
+    function duplicateActiveLayer() {
+      pushHistory();
+      editingLayerIndex = null;
+      const sourceLayer = activeLayer();
+      const copiedLayer = createLayer(`${sourceLayer.name} コピー`, cloneGrid(sourceLayer.pixels), sourceLayer.visible);
+      layers.splice(activeLayerIndex + 1, 0, copiedLayer);
+      activeLayerIndex += 1;
+      syncActivePixels();
+      clearSelection();
+      renderLayerList();
+      render();
+      setNotice(`${copiedLayer.name}を作成しました`);
+    }
+
+    function markActiveLayerRow() {
+      layerList.querySelectorAll(".layer-row").forEach((row) => {
+        row.classList.toggle("active", Number(row.dataset.layerIndex) === activeLayerIndex);
+      });
+      updateLayerControls();
+    }
+
+    function selectLayer(layerIndex, redrawList = true) {
+      if (layerIndex === activeLayerIndex || !layers[layerIndex]) {
+        return;
+      }
+      activeLayerIndex = layerIndex;
+      syncActivePixels();
+      clearSelection();
+      if (redrawList) {
+        editingLayerIndex = null;
+        renderLayerList();
+      } else {
+        markActiveLayerRow();
+      }
+      render();
+      setNotice(`${activeLayer().name}を編集中`);
+    }
+
+    function startLayerRename(layerIndex) {
+      if (!layers[layerIndex]) {
+        return;
+      }
+      activeLayerIndex = layerIndex;
+      syncActivePixels();
+      clearSelection();
+      editingLayerIndex = layerIndex;
+      renderLayerList();
+      render();
+    }
+
+    function renameLayer(layerIndex, rawName) {
+      if (!layers[layerIndex]) {
+        return;
+      }
+      const nextName = rawName.trim() || `レイヤー ${layerIndex + 1}`;
+      editingLayerIndex = null;
+      if (layers[layerIndex].name === nextName) {
+        renderLayerList();
+        return;
+      }
+      pushHistory();
+      layers[layerIndex].name = nextName;
+      renderLayerList();
+      setNotice("レイヤー名を変更しました");
+    }
+
+    function toggleLayerVisibility(layerIndex) {
+      if (!layers[layerIndex]) {
+        return;
+      }
+      pushHistory();
+      layers[layerIndex].visible = !layers[layerIndex].visible;
+      renderLayerList();
+      render();
+      setNotice(layers[layerIndex].visible ? "レイヤーを表示しました" : "レイヤーを非表示にしました");
+    }
+
+    function moveActiveLayer(direction) {
+      const nextIndex = activeLayerIndex + direction;
+      if (nextIndex < 0 || nextIndex >= layers.length) {
+        return;
+      }
+      pushHistory();
+      editingLayerIndex = null;
+      const current = layers[activeLayerIndex];
+      layers[activeLayerIndex] = layers[nextIndex];
+      layers[nextIndex] = current;
+      activeLayerIndex = nextIndex;
+      syncActivePixels();
+      clearSelection();
+      renderLayerList();
+      render();
+      setNotice(direction > 0 ? "レイヤーを上へ移動しました" : "レイヤーを下へ移動しました");
+    }
+
+    function deleteActiveLayer() {
+      if (layers.length <= 1) {
+        setNotice("最後のレイヤーは削除できません");
+        return;
+      }
+      pushHistory();
+      editingLayerIndex = null;
+      const removedName = activeLayer().name;
+      layers.splice(activeLayerIndex, 1);
+      activeLayerIndex = Math.min(activeLayerIndex, layers.length - 1);
+      syncActivePixels();
+      clearSelection();
+      renderLayerList();
+      render();
+      setNotice(`${removedName}を削除しました`);
+    }
+
+    function copySelectedPixels() {
+      const cells = selectedCells();
+      const hasPixels = cells.some((cell) => cell.color);
+      if (!cells.length || !selectionBounds || !hasPixels) {
+        setNotice("コピーする選択範囲がありません");
+        return;
+      }
+
+      duplicateSelectionOnMove = true;
+      render();
+      setNotice("コピーしました。ドラッグで複製を移動できます");
+    }
+
+    function flipSelectedPixels() {
+      const cells = selectedCells();
+      if (!cells.length || !selectionBounds) {
+        setNotice("反転する選択範囲がありません");
+        return;
+      }
+
+      pushHistory();
+      duplicateSelectionOnMove = false;
+      const mirrored = cells.map((cell) => ({
+        x: selectionBounds.minX + selectionBounds.maxX - cell.x,
+        y: cell.y,
+        color: cell.color
+      }));
+      cells.forEach((cell) => {
+        pixels[cell.y][cell.x] = null;
+      });
+      mirrored.forEach((cell) => {
+        pixels[cell.y][cell.x] = cell.color;
+      });
+      setSelectionFromCells(mirrored);
+      render();
+      setNotice("選択範囲を左右反転しました");
+    }
+
+    function rotateSelectedPixels() {
+      const cells = selectedCells();
+      if (!cells.length || !selectionBounds) {
+        setNotice("回転する選択範囲がありません");
+        return;
+      }
+
+      const boxWidth = selectionBounds.maxX - selectionBounds.minX + 1;
+      const boxHeight = selectionBounds.maxY - selectionBounds.minY + 1;
+      const rotated = cells.map((cell) => {
+        const localX = cell.x - selectionBounds.minX;
+        const localY = cell.y - selectionBounds.minY;
+        return {
+          x: selectionBounds.minX + boxHeight - 1 - localY,
+          y: selectionBounds.minY + localX,
+          color: cell.color
+        };
+      });
+
+      if (rotated.some((cell) => cell.x < 0 || cell.y < 0 || cell.x >= width || cell.y >= height)) {
+        setNotice("回転後の範囲がキャンバス外に出ます");
+        return;
+      }
+
+      pushHistory();
+      duplicateSelectionOnMove = false;
+      cells.forEach((cell) => {
+        pixels[cell.y][cell.x] = null;
+      });
+      rotated.forEach((cell) => {
+        pixels[cell.y][cell.x] = cell.color;
+      });
+      setSelectionFromCells(rotated);
+      render();
+      setNotice("選択範囲を90度回転しました");
+    }
+
+    function imageToGridSize(imageWidth, imageHeight) {
+      const scales = [1, 2, 4, 8, 10, 16];
+      for (const scale of scales) {
+        const nextWidth = imageWidth / scale;
+        const nextHeight = imageHeight / scale;
+        if (
+          Number.isInteger(nextWidth) &&
+          Number.isInteger(nextHeight) &&
+          nextWidth >= 8 &&
+          nextHeight >= 8 &&
+          nextWidth <= 128 &&
+          nextHeight <= 128
+        ) {
+          return { width: nextWidth, height: nextHeight };
+        }
+      }
+
+      const ratio = Math.min(128 / imageWidth, 128 / imageHeight, 1);
+      return {
+        width: Math.max(8, Math.min(128, Math.round(imageWidth * ratio))),
+        height: Math.max(8, Math.min(128, Math.round(imageHeight * ratio)))
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return `#${[r, g, b].map((value) => value.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function importImageFile(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        setNotice("画像ファイルを選んでください");
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.addEventListener("load", () => {
+        const nextSize = imageToGridSize(image.naturalWidth, image.naturalHeight);
+        const source = document.createElement("canvas");
+        source.width = nextSize.width;
+        source.height = nextSize.height;
+        const sourceCtx = source.getContext("2d", { willReadFrequently: true });
+        sourceCtx.imageSmoothingEnabled = false;
+        sourceCtx.clearRect(0, 0, source.width, source.height);
+        sourceCtx.drawImage(image, 0, 0, source.width, source.height);
+
+        const data = sourceCtx.getImageData(0, 0, source.width, source.height).data;
+        const imported = makeGrid(source.width, source.height);
+
+        for (let y = 0; y < source.height; y += 1) {
+          for (let x = 0; x < source.width; x += 1) {
+            const index = (y * source.width + x) * 4;
+            const alpha = data[index + 3];
+            imported[y][x] = alpha < 10 ? null : rgbToHex(data[index], data[index + 1], data[index + 2]);
+          }
+        }
+
+        pushHistory();
+        width = source.width;
+        height = source.height;
+        setLayers([createLayer("読み込み画像", imported)]);
+        clearSelection();
+        syncSizeControls();
+        render();
+        renderLayerList();
+        setNotice(`${file.name}を読み込みました`);
+        URL.revokeObjectURL(url);
+      });
+
+      image.addEventListener("error", () => {
+        setNotice("画像を読み込めませんでした");
+        URL.revokeObjectURL(url);
+      });
+
+      image.src = url;
+    }
+
+    function exportDetails() {
+      const cleanName = fileName.value.trim() || "pixel-art.png";
+      const pngName = cleanName.toLowerCase().endsWith(".png") ? cleanName : `${cleanName}.png`;
+      const scale = Math.max(1, Math.floor(1024 / Math.max(width, height)));
+      return {
+        scale,
+        downloadName: pngName,
+        outputWidth: width * scale,
+        outputHeight: height * scale
+      };
+    }
+
+    function openExportConfirm() {
+      const details = exportDetails();
+      exportConfirmTitle.textContent = "PNG保存の確認";
+      confirmCanvasSize.textContent = `${width} x ${height}`;
+      confirmOutputSize.textContent = `${details.outputWidth} x ${details.outputHeight}px`;
+      confirmFileName.textContent = details.downloadName;
+      exportConfirm.hidden = false;
+      confirmExport.focus();
+    }
+
+    function closeExportConfirm() {
+      exportConfirm.hidden = true;
+      exportPng.focus();
+    }
+
+    function drawHighResolutionOutput(context, scale) {
+      drawVisibleLayers(context, scale, 0, 0);
+    }
+
+    function exportImage() {
+      const details = exportDetails();
+      const output = document.createElement("canvas");
+      output.width = details.outputWidth;
+      output.height = details.outputHeight;
+      const out = output.getContext("2d");
+      out.imageSmoothingEnabled = false;
+      drawHighResolutionOutput(out, details.scale);
+
+      const link = document.createElement("a");
+      link.download = details.downloadName;
+      link.href = output.toDataURL("image/png");
+      link.click();
+      closeExportConfirm();
+      setNotice("PNGを保存しました");
+    }
+
+    function buildPalette() {
+      paletteEl.innerHTML = "";
+      defaultPalette.forEach((color) => {
+        const button = document.createElement("button");
+        button.className = "swatch";
+        button.type = "button";
+        button.dataset.color = color;
+        button.title = color;
+        button.setAttribute("aria-label", color);
+        button.style.background = color;
+        button.addEventListener("click", () => setActiveColor(color));
+        paletteEl.appendChild(button);
+      });
+      updateSwatches();
+    }
+
+    canvas.addEventListener("pointerdown", async (event) => {
+      event.preventDefault();
+      canvas.setPointerCapture(event.pointerId);
+      const cell = cellFromEvent(event);
+      drawing = true;
+      activePointerId = event.pointerId;
+      lastPaintCell = null;
+      strokeStartCell = null;
+      strokeBasePixels = null;
+      if (activeTool === "lasso") {
+        const resizeHandle = selectionHandleFromEvent(event);
+        if (resizeHandle) {
+          startSelectionResize(resizeHandle, event);
+          render();
+          return;
+        }
+        if (isInsideSelectionBounds(cell)) {
+          startSelectionMove(cell);
+          render();
+          return;
+        }
+        clearSelection();
+        lassoPoints = cell ? [cell] : [];
+        render();
+        return;
+      }
+      if (activeTool === "text") {
+        clearSelection();
+        drawing = false;
+        activePointerId = null;
+        await renderTextAt(cell);
+        return;
+      }
+      if (isShapeTool()) {
+        clearSelection();
+        shapeStartCell = cell;
+        shapeCurrentCell = cell;
+        shapeShiftKey = event.shiftKey;
+        render();
+        return;
+      }
+      if (activeTool === "draw" || activeTool === "erase") {
+        pushHistory();
+        strokeStartCell = cell;
+        strokeBasePixels = cloneGrid(pixels);
+      }
+      handleCell(cell);
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (drawing && activeTool === "lasso" && event.pointerType === "mouse" && event.buttons === 0) {
+        finishPointerAction();
+        return;
+      }
+      const cell = cellFromEvent(event);
+      coordLabel.textContent = cell ? `x ${cell.x}, y ${cell.y}` : "x -, y -";
+      updateCanvasCursor(cell, event);
+      if (resizingSelection) {
+        applySelectionResize(event);
+        return;
+      }
+      if (movingSelection) {
+        applySelectionMove(cell);
+        return;
+      }
+      if (drawing && activeTool === "lasso" && cell) {
+        const previous = lassoPoints[lassoPoints.length - 1];
+        if (!previous || previous.x !== cell.x || previous.y !== cell.y) {
+          lassoPoints.push(cell);
+          render();
+        }
+        return;
+      }
+      if (drawing && isShapeTool()) {
+        if (cell) {
+          shapeCurrentCell = cell;
+        }
+        shapeShiftKey = event.shiftKey;
+        render();
+        return;
+      }
+      if (drawing && (activeTool === "draw" || activeTool === "erase")) {
+        if (event.shiftKey) {
+          applyStraightStroke(cell);
+        } else {
+          handleCell(cell);
+        }
+      }
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      if (activeTool === "lasso" && activePointerId === event.pointerId) {
+        finishPointerAction();
+        return;
+      }
+      if (isShapeTool() && activePointerId === event.pointerId) {
+        const cell = cellFromEvent(event);
+        if (cell) {
+          shapeCurrentCell = cell;
+        }
+        shapeShiftKey = event.shiftKey;
+        applyActiveShape();
+        shapeStartCell = null;
+        shapeCurrentCell = null;
+        shapeShiftKey = false;
+        drawing = false;
+        activePointerId = null;
+        render();
+        return;
+      }
+      drawing = false;
+      activePointerId = null;
+      lastPaintCell = null;
+      strokeStartCell = null;
+      strokeBasePixels = null;
+    });
+
+    canvas.addEventListener("pointercancel", finishPointerAction);
+    canvas.addEventListener("lostpointercapture", finishPointerAction);
+
+    canvas.addEventListener("pointerleave", () => {
+      coordLabel.textContent = "x -, y -";
+      updateCanvasCursor(null);
+    });
+
+    window.addEventListener("pointerup", (event) => {
+      if (activeTool === "lasso" && activePointerId === event.pointerId) {
+        finishPointerAction();
+      }
+      if (isShapeTool() && activePointerId === event.pointerId) {
+        finishPointerAction();
+      }
+    });
+
+    document.querySelectorAll("[data-tool]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setTool(button.dataset.tool);
+      });
+    });
+
+    document.querySelector(".toolbar").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-tool]");
+      if (button) {
+        setTool(button.dataset.tool);
+      }
+    });
+
+    brushSizeInput.addEventListener("input", () => {
+      const nextSize = Math.max(1, Math.min(32, Number(brushSizeInput.value) || 1));
+      brushSize = nextSize;
+      brushSizeInput.value = nextSize;
+    });
+
+    document.querySelectorAll("[data-shape-style]").forEach((button) => {
+      button.addEventListener("click", () => {
+        shapeStyle = button.dataset.shapeStyle;
+        document.querySelectorAll("[data-shape-style]").forEach((styleButton) => {
+          styleButton.setAttribute("aria-pressed", String(styleButton.dataset.shapeStyle === shapeStyle));
+        });
+        if (drawing && isShapeTool()) {
+          render();
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-text-direction]").forEach((button) => {
+      button.addEventListener("click", () => {
+        textDirection = button.dataset.textDirection;
+        document.querySelectorAll("[data-text-direction]").forEach((directionButton) => {
+          directionButton.setAttribute("aria-pressed", String(directionButton.dataset.textDirection === textDirection));
+        });
+      });
+    });
+
+    sizePreset.addEventListener("change", () => {
+      if (sizePreset.value === "custom") {
+        setNotice("幅と高さを入力してサイズ変更できます");
+        return;
+      }
+      const size = Number(sizePreset.value);
+      resizeGrid(size, size);
+    });
+
+    gridWidth.addEventListener("input", () => {
+      sizePreset.value = "custom";
+    });
+
+    gridHeight.addEventListener("input", () => {
+      sizePreset.value = "custom";
+    });
+
+    colorPicker.addEventListener("input", () => setActiveColor(colorPicker.value));
+    hexInput.addEventListener("change", () => {
+      const color = normalizeHex(hexInput.value);
+      if (color) {
+        setActiveColor(color);
+      } else {
+        hexInput.value = activeColor;
+        setNotice("6桁の色コードを入力してください");
+      }
+    });
+
+    document.querySelector("#resizeCanvas").addEventListener("click", () => {
+      resizeGrid(Number(gridWidth.value), Number(gridHeight.value));
+    });
+    document.querySelector("#clearCanvas").addEventListener("click", clearGrid);
+    copySelection.addEventListener("click", copySelectedPixels);
+    flipSelection.addEventListener("click", flipSelectedPixels);
+    rotateSelection.addEventListener("click", rotateSelectedPixels);
+    addLayer.addEventListener("click", addNewLayer);
+    duplicateLayer.addEventListener("click", duplicateActiveLayer);
+    moveLayerUp.addEventListener("click", () => moveActiveLayer(1));
+    moveLayerDown.addEventListener("click", () => moveActiveLayer(-1));
+    deleteLayer.addEventListener("click", deleteActiveLayer);
+    layerList.addEventListener("click", (event) => {
+      const row = event.target.closest(".layer-row");
+      if (!row) {
+        return;
+      }
+      const layerIndex = Number(row.dataset.layerIndex);
+      if (event.target.closest(".layer-visibility")) {
+        toggleLayerVisibility(layerIndex);
+      } else if (event.target.closest(".layer-name-button")) {
+        selectLayer(layerIndex);
+      }
+    });
+    layerList.addEventListener("dblclick", (event) => {
+      if (!event.target.closest(".layer-name-button")) {
+        return;
+      }
+      const row = event.target.closest(".layer-row");
+      startLayerRename(Number(row.dataset.layerIndex));
+    });
+    layerList.addEventListener("focusin", (event) => {
+      if (!event.target.closest(".layer-name-input")) {
+        return;
+      }
+      const row = event.target.closest(".layer-row");
+      selectLayer(Number(row.dataset.layerIndex), false);
+    });
+    layerList.addEventListener("change", (event) => {
+      if (!event.target.closest(".layer-name-input")) {
+        return;
+      }
+      const row = event.target.closest(".layer-row");
+      renameLayer(Number(row.dataset.layerIndex), event.target.value);
+    });
+    layerList.addEventListener("keydown", (event) => {
+      if (!event.target.closest(".layer-name-input")) {
+        return;
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.target.blur();
+      }
+      if (event.key === "Escape") {
+        const row = event.target.closest(".layer-row");
+        const layer = layers[Number(row.dataset.layerIndex)];
+        event.target.value = layer ? layer.name : "";
+        editingLayerIndex = null;
+        renderLayerList();
+      }
+    });
+    importImage.addEventListener("click", () => {
+      imageInput.click();
+    });
+    imageInput.addEventListener("change", () => {
+      importImageFile(imageInput.files[0]);
+      imageInput.value = "";
+    });
+    exportPng.addEventListener("click", openExportConfirm);
+    cancelExport.addEventListener("click", closeExportConfirm);
+    confirmExport.addEventListener("click", exportImage);
+    exportConfirm.addEventListener("click", (event) => {
+      if (event.target === exportConfirm) {
+        closeExportConfirm();
+      }
+    });
+
+    window.addEventListener("resize", render);
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !exportConfirm.hidden) {
+        closeExportConfirm();
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undo();
+        return;
+      }
+      const arrowMoves = {
+        ArrowUp: { dx: 0, dy: -1 },
+        ArrowDown: { dx: 0, dy: 1 },
+        ArrowLeft: { dx: -1, dy: 0 },
+        ArrowRight: { dx: 1, dy: 0 }
+      };
+      const move = arrowMoves[event.key];
+      const editableTarget = event.target.closest && event.target.closest("input, textarea, select, [contenteditable='true']");
+      if (move && !editableTarget && nudgeSelection(move.dx, move.dy)) {
+        event.preventDefault();
+      }
+    });
+
+    lockAppTitle();
+    window.setTimeout(lockAppTitle, 0);
+    window.setTimeout(lockAppTitle, 300);
+    buildPalette();
+    setTool("draw");
+    updateSelectionControls();
+    syncSizeControls();
+    renderLayerList();
+    render();
+    history = [];
+  </script>
+</body>
+</html>
+
