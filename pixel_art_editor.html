@@ -11,6 +11,7 @@
   <title>Pixel Art Editor</title>
   <link id="favicon" rel="icon" type="image/png" href="apple-touch-icon-v9.png">
   <link id="appleTouchIcon" rel="apple-touch-icon" href="apple-touch-icon-v9.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link href="fonts/misaki.css" rel="stylesheet">
   <style>
     :root {
@@ -1151,6 +1152,12 @@
 
     favicon.href = appIcon.src;
 
+    if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      });
+    }
+
     function lockAppTitle() {
       document.title = "Pixel Art Editor";
       appTitle.textContent = "Pixel Art Editor";
@@ -1341,6 +1348,28 @@
           drawPixelsGrid(context, layer.pixels, cell, offsetX, offsetY);
         }
       });
+    }
+
+    function drawPreviewLayers(context, scale, offsetX, offsetY, drawWidth, drawHeight) {
+      context.save();
+      context.beginPath();
+      context.rect(offsetX, offsetY, drawWidth, drawHeight);
+      context.clip();
+      layers.forEach((layer) => {
+        if (!layer.visible) {
+          return;
+        }
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const color = layer.pixels[y][x];
+            if (color) {
+              context.fillStyle = color;
+              context.fillRect(offsetX + x * scale, offsetY + y * scale, Math.ceil(scale), Math.ceil(scale));
+            }
+          }
+        }
+      });
+      context.restore();
     }
 
     function selectedCells() {
@@ -2527,12 +2556,14 @@
     function renderPreview() {
       previewCtx.imageSmoothingEnabled = false;
       drawChecker(previewCtx, preview.width, preview.height, 10);
-      const cell = Math.floor(Math.min(preview.width / width, preview.height / height));
-      const offsetX = Math.floor((preview.width - cell * width) / 2);
-      const offsetY = Math.floor((preview.height - cell * height) / 2);
+      const scale = Math.min(preview.width / width, preview.height / height);
+      const drawWidth = width * scale;
+      const drawHeight = height * scale;
+      const offsetX = (preview.width - drawWidth) / 2;
+      const offsetY = (preview.height - drawHeight) / 2;
       previewCtx.fillStyle = "#ffffff";
-      previewCtx.fillRect(offsetX, offsetY, cell * width, cell * height);
-      drawVisibleLayers(previewCtx, cell, offsetX, offsetY);
+      previewCtx.fillRect(offsetX, offsetY, drawWidth, drawHeight);
+      drawPreviewLayers(previewCtx, scale, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     function updateStats() {

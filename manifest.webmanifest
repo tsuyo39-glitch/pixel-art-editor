@@ -1,0 +1,19 @@
+{
+  "name": "Pixel Art Editor",
+  "short_name": "Pixel Art",
+  "description": "A browser-based pixel art editor with offline Misaki fonts.",
+  "lang": "ja",
+  "start_url": "pixel_art_editor.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "apple-touch-icon-v9.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
