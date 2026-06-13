@@ -2118,19 +2118,63 @@
 
     function circleShapeCells(start, bounds, style) {
       const cells = [];
+      const filledKeys = new Set();
+      const rowEdges = [];
       const rx = Math.max(bounds.rx - 0.5, 0.5);
       const ry = Math.max(bounds.ry - 0.5, 0.5);
       for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        let left = null;
+        let right = null;
         for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
           const nx = (x - start.x) / rx;
           const ny = (y - start.y) / ry;
           const value = nx * nx + ny * ny;
-          if (style === "fill" ? value <= 1 : value <= 1 && value >= Math.max(0, 1 - 1.8 / Math.max(rx, ry))) {
-            cells.push({ x, y });
+          if (value <= 1) {
+            const cell = { x, y };
+            cells.push(cell);
+            filledKeys.add(`${x},${y}`);
+            left = left === null ? x : left;
+            right = x;
+          }
+        }
+        if (left !== null) {
+          rowEdges.push({ y, left, right, width: right - left + 1 });
+        }
+      }
+      if (style === "fill") {
+        return cells;
+      }
+
+      const outline = new Map();
+      const addOutlineCell = (x, y) => {
+        outline.set(`${x},${y}`, { x, y });
+      };
+      cells.forEach((cell) => {
+        if (
+          !filledKeys.has(`${cell.x - 1},${cell.y}`)
+          || !filledKeys.has(`${cell.x + 1},${cell.y}`)
+          || !filledKeys.has(`${cell.x},${cell.y - 1}`)
+          || !filledKeys.has(`${cell.x},${cell.y + 1}`)
+        ) {
+          addOutlineCell(cell.x, cell.y);
+        }
+      });
+      for (let i = 1; i < rowEdges.length; i += 1) {
+        const previous = rowEdges[i - 1];
+        const current = rowEdges[i];
+        const bridgeY = current.width >= previous.width ? current.y : previous.y;
+        for (let x = Math.min(previous.left, current.left); x <= Math.max(previous.left, current.left); x += 1) {
+          if (filledKeys.has(`${x},${bridgeY}`)) {
+            addOutlineCell(x, bridgeY);
+          }
+        }
+        for (let x = Math.min(previous.right, current.right); x <= Math.max(previous.right, current.right); x += 1) {
+          if (filledKeys.has(`${x},${bridgeY}`)) {
+            addOutlineCell(x, bridgeY);
           }
         }
       }
-      return cells;
+      return Array.from(outline.values());
     }
 
     function pointInTriangle(px, py, a, b, c) {
