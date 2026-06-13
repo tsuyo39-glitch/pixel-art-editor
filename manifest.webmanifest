@@ -1,0 +1,32 @@
+{
+  "name": "Pixel Art Editor",
+  "short_name": "Pixel Art",
+  "description": "A browser-based pixel art editor with offline Misaki fonts.",
+  "lang": "ja",
+  "id": "pixel-art-editor-mushroom",
+  "start_url": "pixel_art_editor.html?v=20260614-mushroom-icon",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "mushroom-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "mushroom-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "mushroom-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

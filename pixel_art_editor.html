@@ -8,11 +8,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Pixel Art">
+  <meta property="og:title" content="Pixel Art Editor">
+  <meta property="og:site_name" content="Pixel Art Editor">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="mushroom-icon-1024.png">
+  <meta property="og:image:secure_url" content="mushroom-icon-1024.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1024">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="mushroom-icon-1024.png">
   <title>Pixel Art Editor</title>
-  <link id="favicon" rel="icon" type="image/png">
-  <link id="appleTouchIcon" rel="apple-touch-icon">
-  <link href="https://unpkg.com/font-misaki/misaki_gothic.css" rel="stylesheet">
-  <link href="https://unpkg.com/font-misaki/misaki_mincho.css" rel="stylesheet">
+  <link rel="image_src" href="mushroom-icon-1024.png">
+  <link id="favicon" rel="icon" type="image/png" sizes="192x192" href="mushroom-icon-192.png">
+  <link id="appleTouchIcon" rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="apple-touch-icon-precomposed.png">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="mushroom-icon-1024.png">
+  <link rel="manifest" href="manifest.webmanifest?v=20260614-mushroom-icon">
+  <link href="fonts/misaki.css" rel="stylesheet">
   <style>
     :root {
       color-scheme: light;
@@ -778,7 +791,7 @@
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <img class="brand-icon" id="appIcon" src="data:image/png;base64,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" alt="" aria-hidden="true">
+        <img class="brand-icon" id="appIcon" src="mushroom-icon-1024.png" alt="" aria-hidden="true">
         <h1 id="appTitle" class="notranslate" translate="no">Pixel Art Editor</h1>
       </div>
       <div class="file-actions" aria-label="ファイル操作">
@@ -1151,7 +1164,12 @@
     };
 
     favicon.href = appIcon.src;
-    appleTouchIcon.href = appIcon.src;
+
+    if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      });
+    }
 
     function lockAppTitle() {
       document.title = "Pixel Art Editor";
@@ -1343,6 +1361,28 @@
           drawPixelsGrid(context, layer.pixels, cell, offsetX, offsetY);
         }
       });
+    }
+
+    function drawPreviewLayers(context, scale, offsetX, offsetY, drawWidth, drawHeight) {
+      context.save();
+      context.beginPath();
+      context.rect(offsetX, offsetY, drawWidth, drawHeight);
+      context.clip();
+      layers.forEach((layer) => {
+        if (!layer.visible) {
+          return;
+        }
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const color = layer.pixels[y][x];
+            if (color) {
+              context.fillStyle = color;
+              context.fillRect(offsetX + x * scale, offsetY + y * scale, Math.ceil(scale), Math.ceil(scale));
+            }
+          }
+        }
+      });
+      context.restore();
     }
 
     function selectedCells() {
@@ -2091,19 +2131,63 @@
 
     function circleShapeCells(start, bounds, style) {
       const cells = [];
+      const filledKeys = new Set();
+      const rowEdges = [];
       const rx = Math.max(bounds.rx - 0.5, 0.5);
       const ry = Math.max(bounds.ry - 0.5, 0.5);
       for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+        let left = null;
+        let right = null;
         for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
           const nx = (x - start.x) / rx;
           const ny = (y - start.y) / ry;
           const value = nx * nx + ny * ny;
-          if (style === "fill" ? value <= 1 : value <= 1 && value >= Math.max(0, 1 - 1.8 / Math.max(rx, ry))) {
-            cells.push({ x, y });
+          if (value <= 1) {
+            const cell = { x, y };
+            cells.push(cell);
+            filledKeys.add(`${x},${y}`);
+            left = left === null ? x : left;
+            right = x;
+          }
+        }
+        if (left !== null) {
+          rowEdges.push({ y, left, right, width: right - left + 1 });
+        }
+      }
+      if (style === "fill") {
+        return cells;
+      }
+
+      const outline = new Map();
+      const addOutlineCell = (x, y) => {
+        outline.set(`${x},${y}`, { x, y });
+      };
+      cells.forEach((cell) => {
+        if (
+          !filledKeys.has(`${cell.x - 1},${cell.y}`)
+          || !filledKeys.has(`${cell.x + 1},${cell.y}`)
+          || !filledKeys.has(`${cell.x},${cell.y - 1}`)
+          || !filledKeys.has(`${cell.x},${cell.y + 1}`)
+        ) {
+          addOutlineCell(cell.x, cell.y);
+        }
+      });
+      for (let i = 1; i < rowEdges.length; i += 1) {
+        const previous = rowEdges[i - 1];
+        const current = rowEdges[i];
+        const bridgeY = current.width >= previous.width ? current.y : previous.y;
+        for (let x = Math.min(previous.left, current.left); x <= Math.max(previous.left, current.left); x += 1) {
+          if (filledKeys.has(`${x},${bridgeY}`)) {
+            addOutlineCell(x, bridgeY);
+          }
+        }
+        for (let x = Math.min(previous.right, current.right); x <= Math.max(previous.right, current.right); x += 1) {
+          if (filledKeys.has(`${x},${bridgeY}`)) {
+            addOutlineCell(x, bridgeY);
           }
         }
       }
-      return cells;
+      return Array.from(outline.values());
     }
 
     function pointInTriangle(px, py, a, b, c) {
@@ -2529,12 +2613,14 @@
     function renderPreview() {
       previewCtx.imageSmoothingEnabled = false;
       drawChecker(previewCtx, preview.width, preview.height, 10);
-      const cell = Math.floor(Math.min(preview.width / width, preview.height / height));
-      const offsetX = Math.floor((preview.width - cell * width) / 2);
-      const offsetY = Math.floor((preview.height - cell * height) / 2);
+      const scale = Math.min(preview.width / width, preview.height / height);
+      const drawWidth = width * scale;
+      const drawHeight = height * scale;
+      const offsetX = (preview.width - drawWidth) / 2;
+      const offsetY = (preview.height - drawHeight) / 2;
       previewCtx.fillStyle = "#ffffff";
-      previewCtx.fillRect(offsetX, offsetY, cell * width, cell * height);
-      drawVisibleLayers(previewCtx, cell, offsetX, offsetY);
+      previewCtx.fillRect(offsetX, offsetY, drawWidth, drawHeight);
+      drawPreviewLayers(previewCtx, scale, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     function updateStats() {

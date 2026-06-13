@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "misaki_gothic";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./misaki/misaki_gothic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "misaki_mincho";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./misaki/misaki_mincho.ttf") format("truetype");
+}
