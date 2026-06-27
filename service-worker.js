@@ -1,12 +1,10 @@
-const CACHE_NAME = "pixel-art-editor-v5";
+const CACHE_NAME = "pixel-art-editor-v6";
 const APP_ASSETS = [
   "./",
   "index.html",
   "pixel_art_editor.html",
   "manifest.webmanifest",
   "apple-touch-icon.png",
-  "apple-touch-icon-precomposed.png",
-  "apple-touch-icon-v9.png",
   "mushroom-icon-192.png",
   "mushroom-icon-512.png",
   "mushroom-icon-1024.png",

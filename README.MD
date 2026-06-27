@@ -28,7 +28,10 @@
 ├─ pixel_art_editor.html
 ├─ manifest.webmanifest
 ├─ service-worker.js
-├─ apple-touch-icon-v9.png
+├─ apple-touch-icon.png
+├─ mushroom-icon-192.png
+├─ mushroom-icon-512.png
+├─ mushroom-icon-1024.png
 ├─ fonts/
 └─ README.MD
 ```

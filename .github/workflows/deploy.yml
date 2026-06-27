@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html pixel_art_editor.html manifest.webmanifest service-worker.js _site/
-          cp apple-touch-icon.png apple-touch-icon-precomposed.png apple-touch-icon-v9.png _site/
+          cp apple-touch-icon.png _site/
           cp mushroom-icon-192.png mushroom-icon-512.png mushroom-icon-1024.png _site/
           cp -R fonts _site/fonts
 
