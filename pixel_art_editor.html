@@ -31,14 +31,15 @@
       --ink: #172026;
       --muted: #6b7280;
       --panel: #ffffff;
-      --line: #d9dee7;
+      --line: #172026;
       --soft: #f4f7fb;
       --canvas: #eef2f7;
       --accent: #0f766e;
       --accent-dark: #0b5f59;
       --danger: #b91c1c;
-      --radius: 8px;
-      --shadow: 0 18px 48px rgba(25, 35, 48, 0.12);
+      --radius: 0;
+      --shadow: 4px 4px 0 rgba(23, 32, 38, 0.22);
+      --pixel-font: "misaki_gothic", "Hiragino Kaku Gothic ProN", monospace;
     }
 
     * {
@@ -50,37 +51,51 @@
       min-height: 100vh;
       min-height: 100dvh;
       background:
-        linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(245, 158, 11, 0.10)),
+        conic-gradient(#eef2f7 25%, #f7f9fc 25% 50%, #eef2f7 50% 75%, #f7f9fc 75%) 0 0 / 24px 24px,
         #f7f9fc;
       color: var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--pixel-font);
+      font-size: 16px;
+      -webkit-font-smoothing: none;
+      font-smooth: never;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior: none;
     }
 
     button,
     input,
-    select {
+    select,
+    textarea {
       font: inherit;
     }
 
+    /* 美咲フォントは単一ウェイトのため、合成ボールドで滲まないよう常に等ウェイトにする */
+    strong,
+    b {
+      font-weight: 400;
+    }
+
     button {
-      border: 1px solid var(--line);
+      border: 2px solid var(--ink);
       background: #fff;
       color: var(--ink);
       cursor: pointer;
-      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, color 120ms ease;
+      box-shadow: 2px 2px 0 rgba(23, 32, 38, 0.35);
     }
 
     button:hover {
-      border-color: #9aa7b8;
-      transform: translateY(-1px);
+      background: var(--soft);
+    }
+
+    button:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: none;
     }
 
     button:focus-visible,
     input:focus-visible,
     select:focus-visible {
-      outline: 3px solid rgba(15, 118, 110, 0.24);
+      outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
 
@@ -97,9 +112,8 @@
       justify-content: space-between;
       gap: 18px;
       padding: 14px clamp(14px, 3vw, 28px);
-      border-bottom: 1px solid rgba(23, 32, 38, 0.10);
-      background: rgba(255, 255, 255, 0.84);
-      backdrop-filter: blur(14px);
+      border-bottom: 2px solid var(--ink);
+      background: #ffffff;
     }
 
     .brand {
@@ -113,16 +127,16 @@
       width: 38px;
       height: 38px;
       object-fit: cover;
-      border: 1px solid #c8d1dd;
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background: #10d5dc;
-      box-shadow: 0 6px 18px rgba(23, 32, 38, 0.10);
+      box-shadow: 2px 2px 0 rgba(23, 32, 38, 0.35);
       image-rendering: pixelated;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.08rem;
+      font-size: 16px;
+      font-weight: 400;
       letter-spacing: 0;
       line-height: 1.1;
       white-space: nowrap;
@@ -150,9 +164,8 @@
     }
 
     .panel {
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(23, 32, 38, 0.10);
-      border-radius: var(--radius);
+      background: #ffffff;
+      border: 2px solid var(--ink);
       box-shadow: var(--shadow);
       padding: 14px;
       min-width: 0;
@@ -160,10 +173,9 @@
 
     .panel h2 {
       margin: 0 0 12px;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #43505f;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--accent-dark);
     }
 
     .left,
@@ -188,13 +200,12 @@
       place-items: center;
       padding: clamp(12px, 2vw, 24px);
       background:
-        linear-gradient(90deg, rgba(23, 32, 38, 0.035) 1px, transparent 1px),
-        linear-gradient(rgba(23, 32, 38, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 32, 38, 0.05) 1px, transparent 1px),
+        linear-gradient(rgba(23, 32, 38, 0.05) 1px, transparent 1px),
         var(--canvas);
       background-size: 18px 18px;
-      border: 1px solid rgba(23, 32, 38, 0.12);
-      border-radius: var(--radius);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72), var(--shadow);
+      border: 2px solid var(--ink);
+      box-shadow: var(--shadow);
       overflow: auto;
     }
 
@@ -205,8 +216,8 @@
       max-height: calc(100vh - 220px);
       aspect-ratio: 1;
       background: #fff;
-      border: 1px solid #aab6c5;
-      box-shadow: 0 18px 44px rgba(23, 32, 38, 0.16);
+      border: 2px solid var(--ink);
+      box-shadow: 6px 6px 0 rgba(23, 32, 38, 0.22);
       cursor: crosshair;
       image-rendering: pixelated;
       touch-action: none;
@@ -221,10 +232,8 @@
     .tool-btn,
     .icon-btn {
       min-height: 42px;
-      border-radius: var(--radius);
       display: inline-grid;
       place-items: center;
-      font-weight: 700;
     }
 
     .history-btn {
@@ -245,7 +254,6 @@
       width: 24px;
       height: 24px;
       pointer-events: none;
-      stroke-width: 2.15;
     }
 
     .control-grid {
@@ -258,8 +266,8 @@
       display: grid;
       gap: 5px;
       color: #415063;
-      font-size: 0.82rem;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 400;
     }
 
     .height-field::before {
@@ -271,8 +279,7 @@
     input[type="text"],
     textarea {
       min-width: 0;
-      border: 1px solid #cfd7e3;
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background: #fff;
       color: var(--ink);
       padding: 0 10px;
@@ -295,8 +302,7 @@
       width: 100%;
       height: 44px;
       padding: 2px;
-      border: 1px solid #cfd7e3;
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background: #fff;
       cursor: pointer;
     }
@@ -307,12 +313,12 @@
 
     input[type="color"]::-webkit-color-swatch {
       border: 0;
-      border-radius: 6px;
+      border-radius: 0;
     }
 
     input[type="color"]::-moz-color-swatch {
       border: 0;
-      border-radius: 6px;
+      border-radius: 0;
     }
 
     .segmented {
@@ -320,24 +326,24 @@
       grid-template-columns: 1fr 1fr;
       gap: 6px;
       padding: 4px;
-      border: 1px solid #cfd7e3;
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background: #eef2f7;
     }
 
     .segment-btn {
       min-height: 32px;
-      border-radius: 6px;
       border-color: transparent;
       background: transparent;
-      font-weight: 750;
+      box-shadow: none;
+      font-size: 12px;
+      white-space: nowrap;
+      padding: 0 2px;
     }
 
     .segment-btn[aria-pressed="true"] {
-      background: #ffffff;
-      border-color: #b8c3d2;
-      color: var(--accent-dark);
-      box-shadow: 0 1px 5px rgba(23, 32, 38, 0.10);
+      background: var(--accent);
+      border-color: var(--accent-dark);
+      color: #fff;
     }
 
     .color-row {
@@ -357,13 +363,13 @@
       width: 100%;
       aspect-ratio: 1;
       min-height: 26px;
-      border-radius: var(--radius);
-      border: 2px solid rgba(23, 32, 38, 0.16);
+      border: 2px solid rgba(23, 32, 38, 0.3);
+      box-shadow: none;
     }
 
     .swatch.active {
-      border-color: #111827;
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+      border-color: var(--ink);
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent);
     }
 
     .actions {
@@ -374,8 +380,6 @@
 
     .action-btn {
       min-height: 40px;
-      border-radius: var(--radius);
-      font-weight: 750;
     }
 
     .action-btn:disabled,
@@ -400,7 +404,7 @@
       margin: 0;
       min-height: 20px;
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 16px;
     }
 
     .layer-actions {
@@ -452,7 +456,6 @@
       width: 22px;
       height: 22px;
       pointer-events: none;
-      stroke-width: 2.1;
     }
 
     .layer-delete-btn {
@@ -478,20 +481,18 @@
       justify-content: space-between;
       gap: 10px;
       color: #465568;
-      font-size: 0.85rem;
+      font-size: 16px;
     }
 
     .status strong {
       color: var(--ink);
-      font-size: 0.92rem;
     }
 
     .preview-frame {
       display: grid;
       place-items: center;
       min-height: 196px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background-color: #e7edf5;
       background-image:
         linear-gradient(45deg, #cfd8e5 25%, transparent 25%),
@@ -522,7 +523,7 @@
       margin: 0;
       min-height: 20px;
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 16px;
     }
 
     .confirm-overlay {
@@ -542,17 +543,15 @@
     .confirm-dialog {
       width: min(420px, 100%);
       padding: 18px;
-      border: 1px solid rgba(23, 32, 38, 0.16);
-      border-radius: var(--radius);
+      border: 2px solid var(--ink);
       background: #fff;
-      box-shadow: 0 22px 60px rgba(23, 32, 38, 0.24);
+      box-shadow: 6px 6px 0 rgba(23, 32, 38, 0.35);
     }
 
     .confirm-dialog h2 {
       margin: 0 0 12px;
-      font-size: 1rem;
+      font-size: 16px;
       letter-spacing: 0;
-      text-transform: none;
       color: var(--ink);
     }
 
@@ -563,7 +562,7 @@
       padding: 0;
       list-style: none;
       color: #405064;
-      font-size: 0.9rem;
+      font-size: 16px;
     }
 
     .confirm-list li {
@@ -576,7 +575,6 @@
 
     .confirm-list strong {
       color: var(--ink);
-      font-weight: 750;
       text-align: right;
     }
 
@@ -610,8 +608,7 @@
         align-items: center;
         flex-direction: row;
         padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
-        background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: none;
+        background: #ffffff;
       }
 
       .brand-icon {
@@ -633,11 +630,9 @@
         grid-template-columns: 1fr 1fr;
         gap: 10px;
         padding: 10px;
-        border: 1px solid rgba(23, 32, 38, 0.12);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.94);
-        box-shadow: 0 16px 46px rgba(23, 32, 38, 0.22);
-        backdrop-filter: blur(14px);
+        border: 2px solid var(--ink);
+        background: #ffffff;
+        box-shadow: 4px 4px 0 rgba(23, 32, 38, 0.3);
       }
 
       .file-actions button {
@@ -667,7 +662,7 @@
 
       .panel {
         padding: 12px;
-        box-shadow: 0 8px 24px rgba(25, 35, 48, 0.10);
+        box-shadow: 3px 3px 0 rgba(23, 32, 38, 0.22);
       }
 
       .left,
@@ -712,7 +707,6 @@
       .status {
         min-height: 36px;
         padding: 9px 10px;
-        font-size: 0.78rem;
       }
 
       .control-grid,
@@ -759,7 +753,6 @@
 
       .confirm-dialog {
         width: 100%;
-        border-radius: 14px;
       }
     }
 
@@ -809,15 +802,13 @@
       <div class="file-actions" aria-label="ファイル操作">
         <div class="history-actions" aria-label="履歴操作">
           <button class="icon-btn history-btn" id="undoAction" type="button" aria-label="元に戻す" title="元に戻す" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 7H4v5"></path>
-              <path d="M4 12c1.8-3.5 5.1-5.5 8.8-5.1 4.4.5 7.2 3.8 7.2 7.6 0 2.1-.9 4-2.3 5.4"></path>
+            <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+              <path d="M3 2h2v1h-2zM2 3h2v1h-2zM1 4h10v1h-10zM2 5h2v1h-2zM10 5h2v1h-2zM3 6h2v1h-2zM10 6h2v1h-2zM10 7h2v1h-2zM9 8h2v1h-2zM6 9h4v1h-4z"></path>
             </svg>
           </button>
           <button class="icon-btn history-btn" id="redoAction" type="button" aria-label="やり直す" title="やり直す" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 7h5v5"></path>
-              <path d="M20 12c-1.8-3.5-5.1-5.5-8.8-5.1C6.8 7.4 4 10.7 4 14.5c0 2.1.9 4 2.3 5.4"></path>
+            <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+              <path d="M7 2h2v1h-2zM8 3h2v1h-2zM1 4h10v1h-10zM0 5h2v1h-2zM8 5h2v1h-2zM0 6h2v1h-2zM7 6h2v1h-2zM0 7h2v1h-2zM1 8h2v1h-2zM2 9h4v1h-4z"></path>
             </svg>
           </button>
         </div>
@@ -833,57 +824,43 @@
           <h2>描画ツール</h2>
           <div class="toolbar" role="toolbar" aria-label="描画ツール">
             <button class="tool-btn" type="button" data-tool="draw" aria-label="ペン" title="ペン">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16.7 4.4a2.5 2.5 0 0 1 3.5 3.5L9.4 18.7 4.5 20l1.3-4.9L16.7 4.4z"></path>
-                <path d="M14.8 6.3l2.9 2.9"></path>
-                <path d="M5.8 15.1l3.6 3.6"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M9 0h2v1h-2zM8 1h4v1h-4zM7 2h5v1h-5zM6 3h5v1h-5zM5 4h5v1h-5zM4 5h5v1h-5zM3 6h5v1h-5zM2 7h5v1h-5zM1 8h5v1h-5zM1 9h4v1h-4zM1 10h2v1h-2zM0 11h1v1h-1z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="erase" aria-label="消しゴム" title="消しゴム">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5.2 14.3l7.7-7.7a3 3 0 0 1 4.2 0l1.7 1.7a3 3 0 0 1 0 4.2l-5.8 5.8H8.7l-3.5-3.5a.4.4 0 0 1 0-.5z"></path>
-                <path d="M11.2 8.3l4.5 4.5"></path>
-                <path d="M8.2 20h9.6"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M3 3h8v1h-8zM2 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM10 5h1v1h-1zM1 6h10v1h-10zM1 7h1v1h-1zM10 7h1v1h-1zM1 8h1v1h-1zM10 8h1v1h-1zM1 9h10v1h-10z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="fill" aria-label="塗りつぶし" title="塗りつぶし">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5.2 12.1l6.2-6.2a2.3 2.3 0 0 1 3.2 0l4.2 4.2a2.3 2.3 0 0 1 0 3.2L13.1 19a2.3 2.3 0 0 1-3.2 0l-4.7-4.7a1.5 1.5 0 0 1 0-2.2z"></path>
-                <path d="M8.6 8.7l6.7 6.7"></path>
-                <path d="M19.2 16.7c1 1 1.6 1.8 1.6 2.5a1.8 1.8 0 0 1-3.6 0c0-.7.7-1.5 2-2.5z"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M4 1h4v1h-4zM3 2h1v1h-1zM8 2h1v1h-1zM1 3h10v1h-10zM1 4h10v1h-10zM2 5h8v1h-8zM2 6h8v1h-8zM2 7h8v1h-8zM3 8h6v1h-6z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="pick" aria-label="色を拾う" title="色を拾う">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.9 4.7a2.4 2.4 0 0 1 3.4 0l1 1a2.4 2.4 0 0 1 0 3.4l-8.4 8.4H7.4v-3.5l7.5-9.3z"></path>
-                <path d="M13.2 7.2l3.6 3.6"></path>
-                <path d="M7.4 17.5l-3 2"></path>
-                <path d="M4.4 20.5h5.3"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M4 0h4v1h-4zM3 1h6v1h-6zM3 2h6v1h-6zM4 3h4v1h-4zM4 4h1v1h-1zM7 4h1v1h-1zM4 5h1v1h-1zM7 5h1v1h-1zM4 6h1v1h-1zM7 6h1v1h-1zM4 7h1v1h-1zM7 7h1v1h-1zM4 8h4v1h-4zM5 9h2v1h-2zM5 10h2v1h-2z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="lasso" aria-label="なげわ選択" title="なげわ選択">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6.2 8.4c1.1-3.2 6.9-4.4 10.7-2.4 3.5 1.9 3.7 5.9.5 7.6-3.7 2-10.4.8-11.5-2.2-.3-.9-.2-2 .3-3z"></path>
-                <path d="M5.4 11.1c-1.8 1.5-1.5 3.6.8 5 3.4 2.1 10.4 2 13.2-.1"></path>
-                <path d="M10.8 17.1l-2.2 3.5"></path>
-                <path d="M8.2 20.6h4.5"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M3 1h6v1h-6zM2 2h2v1h-2zM8 2h2v1h-2zM1 3h2v1h-2zM9 3h2v1h-2zM1 4h2v1h-2zM9 4h2v1h-2zM2 5h2v1h-2zM8 5h2v1h-2zM3 6h6v1h-6zM6 7h2v1h-2zM5 8h2v1h-2zM4 9h2v1h-2zM4 10h2v1h-2zM5 11h2v1h-2z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="circle" aria-label="丸" title="丸">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="7.2"></circle>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M4 2h4v1h-4zM2 3h2v1h-2zM8 3h2v1h-2zM1 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM10 5h1v1h-1zM1 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM10 7h1v1h-1zM2 8h2v1h-2zM8 8h2v1h-2zM4 9h4v1h-4z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="rect" aria-label="四角" title="四角">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="5.5" y="5.5" width="13" height="13" rx="1.2"></rect>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M1 2h10v1h-10zM1 3h1v1h-1zM10 3h1v1h-1zM1 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM10 5h1v1h-1zM1 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM10 7h1v1h-1zM1 8h1v1h-1zM10 8h1v1h-1zM1 9h10v1h-10z"></path>
               </svg>
             </button>
             <button class="tool-btn" type="button" data-tool="text" aria-label="テキスト" title="テキスト">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 6h14"></path>
-                <path d="M12 6v12"></path>
-                <path d="M9 18h6"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M1 1h10v1h-10zM1 2h10v1h-10zM5 3h2v1h-2zM5 4h2v1h-2zM5 5h2v1h-2zM5 6h2v1h-2zM5 7h2v1h-2zM5 8h2v1h-2zM5 9h2v1h-2z"></path>
               </svg>
             </button>
           </div>
@@ -926,26 +903,18 @@
           <h2>選択編集</h2>
           <div class="selection-actions">
             <button class="action-btn selection-action-btn" id="copySelection" type="button" aria-label="コピー" title="コピー" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="8" y="8" width="10" height="10" rx="2.4"></rect>
-                <rect x="5" y="5" width="10" height="10" rx="2.4"></rect>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M3 1h7v1h-7zM3 2h1v1h-1zM9 2h1v1h-1zM1 3h7v1h-7zM9 3h1v1h-1zM1 4h1v1h-1zM7 4h1v1h-1zM9 4h1v1h-1zM1 5h1v1h-1zM7 5h1v1h-1zM9 5h1v1h-1zM1 6h1v1h-1zM7 6h3v1h-3zM1 7h1v1h-1zM7 7h1v1h-1zM1 8h1v1h-1zM7 8h1v1h-1zM1 9h7v1h-7z"></path>
               </svg>
             </button>
             <button class="action-btn selection-action-btn" id="flipSelection" type="button" aria-label="左右反転" title="左右反転" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 4.5v15"></path>
-                <path d="M8.2 7.4L4.5 11l3.7 3.6"></path>
-                <path d="M15.8 7.4l3.7 3.6-3.7 3.6"></path>
-                <path d="M4.8 11h5.1"></path>
-                <path d="M14.1 11h5.1"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M2 2h1v1h-1zM9 2h1v1h-1zM1 3h2v1h-2zM9 3h2v1h-2zM0 4h12v1h-12zM0 5h12v1h-12zM1 6h2v1h-2zM9 6h2v1h-2zM2 7h1v1h-1zM9 7h1v1h-1z"></path>
               </svg>
             </button>
             <button class="action-btn selection-action-btn" id="rotateSelection" type="button" aria-label="90度回転" title="90度回転" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.8 7.2A7.2 7.2 0 1 0 19 15"></path>
-                <path d="M17.8 7.2h-4.2"></path>
-                <path d="M17.8 7.2v-4.2"></path>
-                <path d="M9 10.2v4.8h4.8"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M3 1h6v1h-6zM2 2h2v1h-2zM8 2h2v1h-2zM1 3h2v1h-2zM9 3h2v1h-2zM1 4h1v1h-1zM8 4h4v1h-4zM1 5h1v1h-1zM9 5h2v1h-2zM1 6h1v1h-1zM1 7h2v1h-2zM9 7h2v1h-2zM2 8h2v1h-2zM8 8h2v1h-2zM4 9h4v1h-4z"></path>
               </svg>
             </button>
           </div>
@@ -995,37 +964,28 @@
           <h2>レイヤー</h2>
           <div class="layer-actions" aria-label="レイヤー操作">
             <button class="action-btn layer-icon-btn" id="addLayer" type="button" aria-label="レイヤーを追加" title="レイヤーを追加">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14"></path>
-                <path d="M5 12h14"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M5 2h2v1h-2zM5 3h2v1h-2zM5 4h2v1h-2zM1 5h10v1h-10zM1 6h10v1h-10zM5 7h2v1h-2zM5 8h2v1h-2zM5 9h2v1h-2z"></path>
               </svg>
             </button>
             <button class="action-btn layer-icon-btn" id="duplicateLayer" type="button" aria-label="レイヤーを複製" title="レイヤーを複製">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="8" y="8" width="10" height="10" rx="2.4"></rect>
-                <rect x="5" y="5" width="10" height="10" rx="2.4"></rect>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M3 1h7v1h-7zM3 2h1v1h-1zM9 2h1v1h-1zM1 3h7v1h-7zM9 3h1v1h-1zM1 4h1v1h-1zM7 4h1v1h-1zM9 4h1v1h-1zM1 5h1v1h-1zM7 5h1v1h-1zM9 5h1v1h-1zM1 6h1v1h-1zM7 6h3v1h-3zM1 7h1v1h-1zM7 7h1v1h-1zM1 8h1v1h-1zM7 8h1v1h-1zM1 9h7v1h-7z"></path>
               </svg>
             </button>
             <button class="action-btn layer-icon-btn" id="moveLayerUp" type="button" aria-label="レイヤーを上へ" title="レイヤーを上へ">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 19V5"></path>
-                <path d="M6.5 10.5L12 5l5.5 5.5"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M5 2h2v1h-2zM4 3h4v1h-4zM3 4h6v1h-6zM2 5h8v1h-8zM5 6h2v1h-2zM5 7h2v1h-2zM5 8h2v1h-2zM5 9h2v1h-2z"></path>
               </svg>
             </button>
             <button class="action-btn layer-icon-btn" id="moveLayerDown" type="button" aria-label="レイヤーを下へ" title="レイヤーを下へ">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14"></path>
-                <path d="M6.5 13.5L12 19l5.5-5.5"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M5 2h2v1h-2zM5 3h2v1h-2zM5 4h2v1h-2zM5 5h2v1h-2zM2 6h8v1h-8zM3 7h6v1h-6zM4 8h4v1h-4zM5 9h2v1h-2z"></path>
               </svg>
             </button>
             <button class="action-btn layer-icon-btn layer-delete-btn" id="deleteLayer" type="button" aria-label="レイヤーを削除" title="レイヤーを削除">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8.2 7.2h7.6"></path>
-                <path d="M10 7.2V5.7c0-.7.5-1.2 1.2-1.2h1.6c.7 0 1.2.5 1.2 1.2v1.5"></path>
-                <path d="M6.8 9.2h10.4"></path>
-                <path d="M8.3 9.2l.6 9.2c.1.8.7 1.4 1.5 1.4h3.2c.8 0 1.4-.6 1.5-1.4l.6-9.2"></path>
-                <path d="M10.8 12v4.6"></path>
-                <path d="M13.2 12v4.6"></path>
+              <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">
+                <path d="M4 1h4v1h-4zM1 2h10v1h-10zM2 3h8v1h-8zM2 4h1v1h-1zM4 4h1v1h-1zM7 4h1v1h-1zM9 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM7 5h1v1h-1zM9 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM7 6h1v1h-1zM9 6h1v1h-1zM2 7h1v1h-1zM4 7h1v1h-1zM7 7h1v1h-1zM9 7h1v1h-1zM2 8h1v1h-1zM4 8h1v1h-1zM7 8h1v1h-1zM9 8h1v1h-1zM2 9h8v1h-8z"></path>
               </svg>
             </button>
           </div>
@@ -1328,8 +1288,8 @@
 
     function visibilityIcon(isVisible) {
       return isVisible
-        ? '<path d="M3.5 12s3.2-5 8.5-5 8.5 5 8.5 5-3.2 5-8.5 5-8.5-5-8.5-5z"></path><circle cx="12" cy="12" r="2.4"></circle>'
-        : '<path d="M4.5 4.5l15 15"></path><path d="M9.8 7.4A9.7 9.7 0 0 1 12 7c5.3 0 8.5 5 8.5 5a13 13 0 0 1-2.4 2.8"></path><path d="M14.1 14.1A2.4 2.4 0 0 1 9.9 9.9"></path><path d="M6.4 6.9A14 14 0 0 0 3.5 12s3.2 5 8.5 5c1.2 0 2.2-.2 3.2-.6"></path>';
+        ? '<path d="M3 3h6v1h-6zM2 4h2v1h-2zM8 4h2v1h-2zM1 5h2v1h-2zM5 5h2v1h-2zM9 5h2v1h-2zM1 6h2v1h-2zM5 6h2v1h-2zM9 6h2v1h-2zM2 7h2v1h-2zM8 7h2v1h-2zM3 8h6v1h-6z"></path>'
+        : '<path d="M1 4h1v1h-1zM10 4h1v1h-1zM2 5h2v1h-2zM8 5h2v1h-2zM3 6h6v1h-6zM2 7h1v1h-1zM9 7h1v1h-1zM4 8h1v1h-1zM7 8h1v1h-1z"></path>';
     }
 
     function renderLayerList() {
@@ -1343,7 +1303,7 @@
           return `
             <div class="layer-row${isActive ? " active" : ""}" data-layer-index="${layerIndex}">
               <button class="action-btn layer-icon-btn layer-visibility" type="button" aria-label="${layerName}の表示切替" title="表示切替">
-                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${visibilityIcon(layer.visible)}</svg>
+                <svg viewBox="0 0 12 12" aria-hidden="true" fill="currentColor" shape-rendering="crispEdges">${visibilityIcon(layer.visible)}</svg>
               </button>
               ${nameControl}
             </div>
